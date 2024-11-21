@@ -53,3 +53,5 @@ function Locations(){
         </div>
     );
 }
+
+export default Locations;
