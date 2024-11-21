@@ -11,16 +11,16 @@ import DropMyMenu from '../components/ui/dropMyMenu';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 
-import PropTypes from 'prop-types';
-
-function Dashboard() {
+function Dashboard(props) {
     const [luggageCarts, setLuggageCarts] = useState([]);
     const [error, setError] = useState(null);
+
+    const { airportCode } = props;
 
 
       useEffect(() => {
         axios
-            .get('http://localhost:4000/api/carts')
+            .get('http://localhost:4000/api/carts', {airportCode: airportCode})
             .then((response) => {
                 console.log("API Response:", response.data); // Debug API data
                 setLuggageCarts(response.data);

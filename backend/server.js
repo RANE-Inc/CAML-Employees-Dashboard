@@ -42,26 +42,15 @@ const airportSchema = new Schema({
   numberOfCarts: Number
 });
 
-//    const airports = [
-//   {location:"Ottawa, ON, Canada", airportCode:"YOW", numberOfCarts:10},
-//   {location:"Toronto, ON, Canada", airportCode:"YYZ", numberOfCarts:6},
-//   {location:"Montreal, QC, Canada", airportCode:"YUL", numberOfCarts:4},
-//   {location:"Vancouver, BC, Canada", airportCode:"YVR", numberOfCarts:4},
-//   {location:"Edmonton, AB, Canada", airportCode:"YEG", numberOfCarts:5},
-//   {location:"Halifax, NS, Canada", airportCode:"YHZ", numberOfCarts:6}
-// ];
-
-
 // Compile the model
 const Cart = mongoose.model('carts', cartSchema);
 const Airport = mongoose.model('airports', airportSchema);
 
 
-
 //find all carts
 app.get('/api/carts', async (req, res) => {
   try {
-    const allCarts = await Cart.find({});
+    const allCarts = await Cart.find({airport: req.query.airport} || {});
     res.send(allCarts);
     console.log('Carts retrieved');
   } catch (error) {
@@ -80,6 +69,16 @@ app.get('/api/airports', async (req, res) => {
       res.status(500).send({ error: "Internal Server Error" });
   }
 });
+
+app.get('/api/airports/YOW', async (req, res) => {
+  try {
+    const airport = await Airport.find({ airportCode: "YOW" });
+    res.send(airport);
+    console.log('Airport retrieved');
+  } catch (error) {
+    res.status(500).send('Error retrieving airport');
+  }
+} );
 
 // Schedule Cart
 app.post('/api/ScheduleCart', async (req, res) => {
