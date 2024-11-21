@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import {Card,
     CardContent,
     CardDescription,
@@ -11,11 +11,11 @@ import DropMyMenu from '../components/ui/dropMyMenu';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 
-function Dashboard(props) {
+function Dashboard() {
     const [luggageCarts, setLuggageCarts] = useState([]);
     const [error, setError] = useState(null);
 
-    const { airportCode } = props;
+    const { airportCode } = useParams();
 
 
       useEffect(() => {
