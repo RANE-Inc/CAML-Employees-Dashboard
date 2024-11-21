@@ -8,6 +8,9 @@ import {Card,
     CardTitle,} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import DropMyMenu from '../components/ui/dropMyMenu';
+import axios from 'axios';
+import e from 'cors';
+import { useState, useEffect } from 'react';
 
 function Locations(){
 
@@ -17,10 +20,10 @@ function Locations(){
 
     useEffect(() => {
         axios
-            .get('http://localhost:4000/api/aiports')
+            .get('http://localhost:4000/api/airports')
             .then((response) => {
                 console.log("API Response:", response.data); // Debug API data
-                setLuggageCarts(response.data);
+                setAirports(response.data);
             })
             .catch((error) => {
                 console.error("API Error:", error);
@@ -33,7 +36,7 @@ function Locations(){
             <DropMyMenu/>
 
             <div style={{position:"fixed", top:"8%", left:"15%"}} className="grid gap-12 p-4 sm:grid-cols-3 md:grid-cols-4">
-                {airports.map((airport) =>
+                {Airports.map((airport) =>
                     <div key={airport.airportCode} className='max-w-xs text-left'>
                         <Card className="bg-indigo-300 h-[150px] w-[115%]">
                             <CardTitle style={{paddingLeft:"7%", paddingTop:"3%", fontSize:"160%"}}>{airport.location}</CardTitle>
