@@ -10,12 +10,6 @@ import ScheduleCart from './assets/ScheduleCart';
 //import ConnectROS from './components/ui/ConnectROS'
 import './App.css';
 
-// function App() {
-//   return (
-//       <Home/>
-//   )
-// }
-
 export default function App() {
 
   return (
@@ -38,5 +32,3 @@ export default function App() {
   </BrowserRouter> 
   );
 }
-
-// export default App

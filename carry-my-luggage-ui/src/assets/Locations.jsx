@@ -9,32 +9,40 @@ import {Card,
 import { Button } from "../components/ui/button";
 import DropMyMenu from '../components/ui/dropMyMenu';
 
-
 function Locations(){
 
-    const airports = [
-        {location:"Ottawa, ON, Canada", airportCode:"YOW", numberOfCarts:10},
-        {location:"Toronto, ON, Canada", airportCode:"YYZ", numberOfCarts:6},
-        {location:"Montreal, QC, Canada", airportCode:"YUL", numberOfCarts:4},
-        {location:"Vancouver, BC, Canada", airportCode:"YVR", numberOfCarts:4},
-        {location:"Edmonton, AB, Canada", airportCode:"YEG", numberOfCarts:5},
-        {location:"Halifax, NS, Canada", airportCode:"YHZ", numberOfCarts:6}
-    ];
 
+    const [Airports, setAirports] = useState([]);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        axios
+            .get('http://localhost:4000/api/aiports')
+            .then((response) => {
+                console.log("API Response:", response.data); // Debug API data
+                setLuggageCarts(response.data);
+            })
+            .catch((error) => {
+                console.error("API Error:", error);
+                setError("Failed to fetch carts. Please try again later.");
+            });
+    }, []);
+    
     return(
         <div>
             <DropMyMenu/>
 
             <div style={{position:"fixed", top:"8%", left:"15%"}} className="grid gap-12 p-4 sm:grid-cols-3 md:grid-cols-4">
                 {airports.map((airport) =>
-                    <div className='max-w-xs text-left'>
+                    <div key={airport.airportCode} className='max-w-xs text-left'>
                         <Card className="bg-indigo-300 h-[150px] w-[115%]">
                             <CardTitle style={{paddingLeft:"7%", paddingTop:"3%", fontSize:"160%"}}>{airport.location}</CardTitle>
                             <CardContent style={{paddingTop:"3%", paddingBottom:"1%", fontSize:"110%"}}>Code: {airport.airportCode} </CardContent>
                             <CardContent style={{paddingBottom:"2%", fontSize:"110%"}}>Carts: {airport.numberOfCarts} </CardContent>
                             <div style={{paddingLeft:'4%'}}>
                                 <Button style={{fontSize:'100%', paddingLeft:''}} variant="secondary"  className="bg-indigo-500" type='submit'>
-                                    <Link style={{color:"white" }} to='/Dashboard'>Select</Link>
+                                    <Link style={{color:"white" }} to={`/Dashboard/${airport.airportCode}`}>Select</Link>
+
                                 </Button>
                             </div>
                         </Card>
@@ -45,5 +53,3 @@ function Locations(){
         </div>
     );
 }
-
-export default Locations;
