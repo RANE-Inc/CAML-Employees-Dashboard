@@ -23,7 +23,7 @@ export default function App() {
         <Route path="/Signup" element = {<Signup/>} />
         <Route path="/Locations" element = {<Locations/>} />
         <Route path="/Dashboard/:airportCode" element = {<Dashboard/>} />
-        <Route path="/Cart" element = {<Cart/>}/>
+        <Route path="/Cart/:cartId" element = {<Cart/>}/>
         <Route path="/ScheduleCart" element = {<ScheduleCart/>} />
       </Routes>
 

@@ -71,7 +71,7 @@ function Dashboard() {
                                         className="bg-indigo-500"
                                         type="submit"
                                     >
-                                        <Link style={{color:"white"}} to='/Cart'>Select Cart</Link>
+                                        <Link style={{color:"white"}} to={`/Cart/${cart.cartId}`}>Select Cart</Link>
                                     </Button>
                                 </div>
                             </Card>

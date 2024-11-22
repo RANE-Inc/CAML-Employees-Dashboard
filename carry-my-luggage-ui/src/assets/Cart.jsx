@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import { Button } from "../components/ui/button";
 import DropMyMenu from '../components/ui/dropMyMenu';
 import {Card,
@@ -8,9 +8,30 @@ import {Card,
     CardFooter,
     CardHeader,
     CardTitle,} from "../components/ui/card";
-
+import axios from 'axios';
+import { useState, useEffect } from 'react';
 function Cart(){
 
+    const [carts, setCarts] = useState([]);
+    const [error, setError] = useState(null);
+
+    const { cartId } = useParams();
+
+    console.log("Cart ID: ", cartId);
+
+      useEffect(() => {
+        axios
+            .get('http://localhost:4000/api/cart', {params: {cartId: cartId}})
+            .then((response) => {
+                console.log("API Response:", response.data); // Debug API data
+                setLuggageCarts(response.data);
+            })
+            .catch((error) => {
+                console.error("API Error:", error);
+                setError("Failed to fetch carts. Please try again later.");
+            });
+    }, []);
+    
     const cart = {cartNum:'1' ,airport:'YOW', battery: 50, status:'Moving To', Location:'Gate 1', timeRem:30};
 
     return(

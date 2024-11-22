@@ -61,6 +61,18 @@ app.get('/api/carts', async (req, res) => {
   }
 });
 
+app.get('/api/cart', async (req, res) => {
+  try {
+    console.log('CartId:', req.query.cartId);
+    const getCart = await Cart.find({cartId: req.query.cartId});
+    res.send(getCart);
+    console.log('Carts retrieved');
+  } catch (error) {
+      console.error("Error during aggregation:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
 
 app.get('/api/airports', async (req, res) => {
   try {

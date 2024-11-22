@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import {Card,
     CardContent,
     CardDescription,
@@ -45,7 +45,6 @@ function Locations(){
                             <div style={{paddingLeft:'4%'}}>
                                 <Button style={{fontSize:'100%', paddingLeft:''}} variant="secondary"  className="bg-indigo-500" type='submit'>
                                     <Link style={{color:"white" }} to={`/Dashboard/${airport.airportCode}`}>Select</Link>
-
                                 </Button>
                             </div>
                         </Card>
