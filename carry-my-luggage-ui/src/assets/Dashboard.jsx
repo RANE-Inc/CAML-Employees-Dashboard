@@ -18,9 +18,10 @@ function Dashboard() {
     const { airportCode } = useParams();
 
 
+    console.log("Airport Code:", airportCode); // Debug airport code
       useEffect(() => {
         axios
-            .get('http://localhost:4000/api/carts', {airportCode: airportCode})
+            .get('http://localhost:4000/api/carts', {params: {airportCode: airportCode}})
             .then((response) => {
                 console.log("API Response:", response.data); // Debug API data
                 setLuggageCarts(response.data);

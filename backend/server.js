@@ -22,6 +22,7 @@ mongoose.connect(MONGODB_URL)
 
 
 
+
 // Define a schema
 const Schema = mongoose.Schema;
 const cartSchema = new Schema({
@@ -50,7 +51,8 @@ const Airport = mongoose.model('airports', airportSchema);
 //find all carts
 app.get('/api/carts', async (req, res) => {
   try {
-    const allCarts = await Cart.find({airport: req.query.airport} || {});
+    console.log('Airport:', req.query.airportCode);
+    const allCarts = await Cart.find({airport: req.query.airportCode}); //TODO: Query by cartID using substring
     res.send(allCarts);
     console.log('Carts retrieved');
   } catch (error) {
@@ -58,6 +60,7 @@ app.get('/api/carts', async (req, res) => {
       res.status(500).send({ error: "Internal Server Error" });
   }
 });
+
 
 app.get('/api/airports', async (req, res) => {
   try {
@@ -70,82 +73,7 @@ app.get('/api/airports', async (req, res) => {
   }
 });
 
-app.get('/api/airports/YOW', async (req, res) => {
-  try {
-    const airport = await Airport.find({ airportCode: "YOW" });
-    res.send(airport);
-    console.log('Airport retrieved');
-  } catch (error) {
-    res.status(500).send('Error retrieving airport');
-  }
-} );
 
-// Schedule Cart
-app.post('/api/ScheduleCart', async (req, res) => {
-  try {
-    const booking = new Cart({
-      cartNum: req.body.cartNum || 3,
-      airport: req.body.airport || 'YOW',
-      battery: req.body.battery || 100,
-      status: req.body.status || 'Available',
-      location: req.body.location || 'Terminal 1',
-      timeRem: req.body.timeRem || 10,
-      cartId: req.body.cartId || 'YOW3'
-    });
-
-    await booking.save();
-    res.send('Booking created');
-    console.log('Booking created');
-  } catch (error) {
-    res.status(500).send('Error creating booking');
-  }
-});
-
-app.get('/api/ScheduleCart', async (req, res) => {
-  try {
-    const cart = await Cart.find({ cartNum: req.query.cartNum });
-    res.json(cart);
-    console.log('Booking retrieved');
-  } catch (error) {
-    res.status(500).send('Error retrieving booking');
-  }
-});
-
-// Update Booking
-app.put('/api/ScheduleCart', async (req, res) => {
-  try {
-    await Cart.updateOne(
-      { cartNum: req.body.cartNum },
-      { $set: { status: 'Unavailable', timeRem: 0 } }
-    );
-    res.send('Booking updated');
-    console.log('Booking updated');
-  } catch (error) {
-    res.status(500).send('Error updating booking');
-  }
-});
-
-// Delete Booking
-app.delete('/api/ScheduleCart', async (req, res) => {
-  try {
-    await Cart.deleteOne({ cartNum: req.body.cartNum });
-    res.send('Booking deleted');
-    console.log('Booking deleted');
-  } catch (error) {
-    res.status(500).send('Error deleting booking');
-  }
-});
-
-// Get Luggage Cart Data
-app.get('/api/ScheduleCart', async (req, res) => {
-  try {
-    const carts = await mongoose.connection.db.collection('cart').find({}).toArray();
-    res.json(carts);
-    console.log('Cart data retrieved');
-  } catch (error) {
-    res.status(500).send('Error retrieving cart data');
-  }
-});
 
 //set up the server
 
