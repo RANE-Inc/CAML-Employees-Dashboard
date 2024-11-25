@@ -31,6 +31,8 @@ function ScheduleCart(){
         e.preventDefault();
     }
 
+    (cart.airport);
+
     return(
         <div>
             <DropMyMenu/>
@@ -76,7 +78,7 @@ function ScheduleCart(){
 
                     <div style={{paddingTop:'8%'}}>
                     <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-indigo-500" type='submit'>
-                        <Link style={{color:"white"}} to={`/Dashboard/${cart.airportCode}`}>Confirm</Link>
+                        <Link style={{color:"white"}} to={`/Dashboard/${cart.airport}`}>Confirm</Link>
                     </Button>
                     </div>
                 </form>
