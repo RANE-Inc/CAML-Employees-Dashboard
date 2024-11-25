@@ -48,11 +48,12 @@ const Cart = mongoose.model('carts', cartSchema);
 const Airport = mongoose.model('airports', airportSchema);
 
 
+
 //find all carts
 app.get('/api/carts', async (req, res) => {
   try {
     console.log('Airport:', req.query.airportCode);
-    const allCarts = await Cart.find({airport: req.query.airportCode}); //TODO: Query by cartID using substring
+    const allCarts = await Cart.find({airport: req.query.airportCode} || {}); //TODO: Query by cartID using substring
     res.send(allCarts);
     console.log('Carts retrieved');
   } catch (error) {
@@ -64,8 +65,8 @@ app.get('/api/carts', async (req, res) => {
 app.get('/api/cart', async (req, res) => {
   try {
     console.log('CartId:', req.query.cartId);
-    const getCart = await Cart.find({cartId: req.query.cartId});
-    res.send(getCart);
+    const getCart = await Cart.find({cartId: req.query.cartId} || {});
+    res.send(getCart[0]);
     console.log('Carts retrieved');
   } catch (error) {
       console.error("Error during aggregation:", error);

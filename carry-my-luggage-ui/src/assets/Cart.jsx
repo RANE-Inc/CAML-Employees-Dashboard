@@ -12,7 +12,7 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 function Cart(){
 
-    const [carts, setCarts] = useState([]);
+    const [cart, setCart] = useState([]);
     const [error, setError] = useState(null);
 
     const { cartId } = useParams();
@@ -21,10 +21,10 @@ function Cart(){
 
       useEffect(() => {
         axios
-            .get('http://localhost:4000/api/cart', {params: {cartId: cartId}})
+            .get('http://localhost:4000/api/cart', {params: {cartId: cartId}|| {}})
             .then((response) => {
                 console.log("API Response:", response.data); // Debug API data
-                setLuggageCarts(response.data);
+                setCart(response.data);
             })
             .catch((error) => {
                 console.error("API Error:", error);
@@ -32,7 +32,7 @@ function Cart(){
             });
     }, []);
     
-    const cart = {cartNum:'1' ,airport:'YOW', battery: 50, status:'Moving To', Location:'Gate 1', timeRem:30};
+    // const cart = {cartNum:'1' ,airport:'YOW', battery: 50, status:'Moving To', Location:'Gate 1', timeRem:30};
 
     return(
 
