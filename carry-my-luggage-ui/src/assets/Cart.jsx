@@ -57,7 +57,7 @@ function Cart(){
                 </CardContent>
                 <div style={{paddingTop:'10%', paddingBottom:'5%'}}>
                     <Button style={{fontSize:'150%', color:"white"}} variant="secondary"  className="bg-indigo-500">
-                        <Link style={{color:"white"}} to="/ScheduleCart">
+                        <Link style={{color:"white"}} to={`/ScheduleCart/${cart.cartId}`}>
                             Schedule Cart {cart.cartNum}
                         </Link>
                     </Button>

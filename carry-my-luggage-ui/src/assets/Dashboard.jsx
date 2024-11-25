@@ -35,7 +35,7 @@ function Dashboard() {
         <div>
             <DropMyMenu />
             <div style={{ position: "fixed", top: "2%", left: "45%", fontSize: '250%' }}>
-                Airport Name
+                {airportCode} Airport
             </div>
 
             <div

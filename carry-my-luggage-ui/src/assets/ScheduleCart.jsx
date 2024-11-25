@@ -1,13 +1,31 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import { Button } from "../components/ui/button";
 import DropMyMenu from '../components/ui/dropMyMenu';
-import{ useState } from 'react';
+import{ useState, useEffect } from 'react';
+import axios from 'axios';
+
 
 function ScheduleCart(){
 
     const [selectedTime, setSelectedTime] = useState('');
     const [selectedAMPM, setSelectedAMPM] = useState('');
+    const [cart, setCart] = useState([]);
+
+    const { cartId } = useParams();
+
+    useEffect(() => {
+        axios
+            .get('http://localhost:4000/api/cart', {params: {cartId: cartId}|| {}})
+            .then((response) => {
+                console.log("API Response:", response.data); // Debug API data
+                setCart(response.data);
+            })
+            .catch((error) => {
+                console.error("API Error:", error);
+                setError("Failed to fetch carts. Please try again later.");
+            });
+    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -20,7 +38,7 @@ function ScheduleCart(){
             <div style={{fontFamily:'Kanit', position:"fixed", top:"20%", left:'41%'}}>
 
                 <div style={{fontSize:"250%"}}>
-                    Schedule Cart    
+                    Schedule Cart {cart.cartNum}
                 </div>
 
                 <form className="grid grid-cols-1" style={{paddingTop:'5%'}} onSubmit={handleSubmit}>

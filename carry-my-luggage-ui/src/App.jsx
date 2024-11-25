@@ -24,7 +24,7 @@ export default function App() {
         <Route path="/Locations" element = {<Locations/>} />
         <Route path="/Dashboard/:airportCode" element = {<Dashboard/>} />
         <Route path="/Cart/:cartId" element = {<Cart/>}/>
-        <Route path="/ScheduleCart" element = {<ScheduleCart/>} />
+        <Route path="/ScheduleCart/:cartId" element = {<ScheduleCart/>} />
       </Routes>
 
     </div>
