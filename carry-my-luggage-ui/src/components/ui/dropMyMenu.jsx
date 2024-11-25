@@ -23,7 +23,7 @@ function DropMyMenu(){
               </DropdownMenuItem>
               <DropdownMenuItem  className="bg-indigo-300">
                 <Button style={{fontSize:"120%" }} variant="secondary"  className="bg-indigo-500">
-                  <Link style={{color:"white"}} to="/Dashboard">Dashboard</Link>
+                  <Link style={{color:"white"}} to="/Dashboard/YOW">Dashboard</Link>
                 </Button>
               </DropdownMenuItem>
               <DropdownMenuItem  className="bg-indigo-300">

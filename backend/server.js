@@ -53,7 +53,7 @@ const Airport = mongoose.model('airports', airportSchema);
 app.get('/api/carts', async (req, res) => {
   try {
     console.log('Airport:', req.query.airportCode);
-    const allCarts = await Cart.find({airport: req.query.airportCode} || {}); //TODO: Query by cartID using substring
+    const allCarts = await Cart.find({airport: req.query.airportCode}); //TODO: Query by cartID using substring
     res.send(allCarts);
     console.log('Carts retrieved');
   } catch (error) {
@@ -74,7 +74,6 @@ app.get('/api/cart', async (req, res) => {
   }
 });
 
-
 app.get('/api/airports', async (req, res) => {
   try {
     const allAirports = await Airport.find({});
@@ -87,10 +86,8 @@ app.get('/api/airports', async (req, res) => {
 });
 
 
-
 //set up the server
 
 app.listen(PORT_2, () => {
   console.log('Server started on http://localhost:' + PORT_2);
-}
-);
+});
