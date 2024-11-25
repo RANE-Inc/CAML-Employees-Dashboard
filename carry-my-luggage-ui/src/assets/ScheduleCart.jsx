@@ -76,7 +76,7 @@ function ScheduleCart(){
 
                     <div style={{paddingTop:'8%'}}>
                     <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-indigo-500" type='submit'>
-                        <Link style={{color:"white"}} to='/Dashboard'>Confirm</Link>
+                        <Link style={{color:"white"}} to={`/Dashboard/${cart.airportCode}`}>Confirm</Link>
                     </Button>
                     </div>
                 </form>
