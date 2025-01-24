@@ -10,7 +10,8 @@ function ScheduleCart(){
 
     const [selectedTime, setSelectedTime] = useState('');
     const [selectedAMPM, setSelectedAMPM] = useState('');
-    const [selectedGoTo, setSelectedGoTo] = useState('');
+    const [selectedStart, setSelectedStart] = useState('');
+    const [selectedDestination, setSelectedDestination] = useState('');
     const [cart, setCart] = useState([]);
 
     const { cartId } = useParams();
@@ -76,11 +77,23 @@ function ScheduleCart(){
                             <option value="2">AM</option>
                         </select>
 
-                        <label htmlFor='GoTo' style={{paddingTop:'3%'}}>Select Next Location</label>
+                        <label htmlFor='Start' style={{paddingTop:'3%'}}>Select Start Location</label>
                         <select
-                            id="Task"
-                            value={selectedGoTo}
-                            onChange={(e) => setSelectedGoTo(e.target.value)}
+                            id="Start"
+                            value={selectedStart}
+                            onChange={(e) => setSelectedStart(e.target.value)}
+                        >
+                            <option value="1">Gate A</option>
+                            <option value="2">Gate B</option>
+                            <option value="3">Gate C</option>
+                            <option value="4">Charging Station</option>
+                        </select>
+
+                        <label htmlFor='Destination' style={{paddingTop:'3%'}}>Select Destination</label>
+                        <select
+                            id="Destination"
+                            value={selectedDestination}
+                            onChange={(e) => setSelectedDestination(e.target.value)}
                         >
                             <option value="1">Gate A</option>
                             <option value="2">Gate B</option>

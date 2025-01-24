@@ -46,10 +46,11 @@ const airportSchema = new Schema({
 const taskSchema = new Schema({
   taskID: String,
   airport: String,
-  airportLoc: String,
+  airportLoc: String,     //Destination
+  startPoint: String,
   CartNum: String,
   taskTime: String,
-  completed: Boolean
+  status: String    //Enum possibly
 })
 
 // Compile the model
@@ -99,14 +100,15 @@ app.get('/api/airports', async (req, res) => {
 app.post('/api/tasks', async (req, res) => {
   
   try{
-    const {Airport, cartNum, GoTo, Time} = req.body;     //Time is in military, conversion will be done in ui side
+    const {Airport, cartNum, start, end, Time} = req.body;     //Time is in military, conversion will be done in ui side
 
     const task = new Task({
       airport: Airport,
-      airportLoc: GoTo,
+      airportLoc: start,
+      startPoint: end,
       CartNum: cartNum,
       taskTime: Time,
-      completed: false,
+      status: "Not Started",
     });
 
     res = await task.save();
