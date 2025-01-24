@@ -43,12 +43,22 @@ const airportSchema = new Schema({
   numberOfCarts: Number
 });
 
+const taskSchema = new Schema({
+  taskID: String,
+  airport: String,
+  airportLoc: String,
+  CartNum: String,
+  taskTime: String,
+  completed: Boolean
+})
+
 // Compile the model
 const Cart = mongoose.model('carts', cartSchema);
 const Airport = mongoose.model('airports', airportSchema);
+const Task = mongoose.model('tasks', taskSchema);
 
 
-
+//---Queries for getting from Database---
 //find all carts
 app.get('/api/carts', async (req, res) => {
   try {
@@ -84,6 +94,39 @@ app.get('/api/airports', async (req, res) => {
       res.status(500).send({ error: "Internal Server Error" });
   }
 });
+
+//---Queries for posting to Database---
+app.post('/api/tasks', async (req, res) => {
+  
+  try{
+    const {Airport, cartNum, GoTo, Time} = req.body;     //Time is in military, conversion will be done in ui side
+
+    const task = new Task({
+      airport: Airport,
+      airportLoc: GoTo,
+      CartNum: cartNum,
+      taskTime: Time,
+      completed: false,
+    });
+
+    res = await task.save();
+    console.log("Created Task: ", res);
+
+    // Task.insertOne({
+    //   airport: Airport,
+    //   airportLoc: GoTo,
+    //   CartNum: cartNum,
+    //   taskTime: Time,
+    //   completed: false,
+    // })
+
+    res.send()
+  }catch(error){
+    console.error("Error posting to database: ", error);
+    res.status(500).send({error: "Internal Server Error"});
+  }
+
+})
 
 
 //set up the server
