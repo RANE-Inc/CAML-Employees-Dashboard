@@ -76,7 +76,7 @@ app.get('/api/carts', async (req, res) => {
 app.get('/api/cart', async (req, res) => {
   try {
     console.log('CartId:', req.query.cartId);
-    const getCart = await Cart.find({cartId: req.query.cartId});
+    const getCart = await Cart.find({cartId: req.query.cartId} || {});
     res.send(getCart[0]);
     console.log('Carts retrieved');
   } catch (error) {
