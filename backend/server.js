@@ -6,7 +6,6 @@ import cors from 'cors';
 
 const env = dotenv.config();
 
-const PORT_1 = process.env.PORT_1 // port number
 const PORT_2 = process.env.PORT_2 // port number
 const MONGODB_URL = process.env.MONGODB_URL // mongodb url
 

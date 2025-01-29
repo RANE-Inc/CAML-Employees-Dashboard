@@ -10,7 +10,7 @@ function Home(){
                 Welcome To
             </div>
             <div style={{fontSize:"250%"}}>
-                CarryMyLuggage    
+                CAML Autonomous Mobility Lift  
             </div>
             <div className="grid grid-cols-1" style={{paddingTop:'15%'}}>
                 <div style={{paddingTop:'5%'}}>
