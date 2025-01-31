@@ -39,7 +39,7 @@ function Cart(){
         <div>
             <DropMyMenu/>
 
-            <Card className="bg-indigo-300" style={{fontFamily:'Kanit', position:"fixed", top:"20%", left:'40%'}}>
+            <Card className="bg-amber-400" style={{fontFamily:'Kanit', position:"fixed", top:"20%", left:'40%'}}>
                 <CardTitle style={{paddingTop:'3%', fontSize:'225%'}}>
                     Cart {cart.cartNum}
                 </CardTitle>
@@ -56,7 +56,7 @@ function Cart(){
                     Time Remaining: {cart.timeRem} Minutes
                 </CardContent>
                 <div style={{paddingTop:'10%', paddingBottom:'5%'}}>
-                    <Button style={{fontSize:'150%', color:"white"}} variant="secondary"  className="bg-indigo-500">
+                    <Button style={{fontSize:'150%', color:"white"}} variant="secondary"  className="bg-amber-600">
                         <Link style={{color:"white"}} to={`/ScheduleCart/${cart.cartId}`}>
                             Schedule Cart {cart.cartNum}
                         </Link>

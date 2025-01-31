@@ -38,12 +38,12 @@ function Locations(){
             <div style={{position:"fixed", top:"8%", left:"15%"}} className="grid gap-12 p-4 sm:grid-cols-3 md:grid-cols-4">
                 {Airports.map((airport) =>
                     <div key={airport.airportCode} className='max-w-xs text-left'>
-                        <Card className="bg-indigo-300 h-[150px] w-[115%]">
+                        <Card className="bg-amber-400 h-[150px] w-[115%]">
                             <CardTitle style={{paddingLeft:"7%", paddingTop:"3%", fontSize:"160%"}}>{airport.location}</CardTitle>
                             <CardContent style={{paddingTop:"3%", paddingBottom:"1%", fontSize:"110%"}}>Code: {airport.airportCode} </CardContent>
                             <CardContent style={{paddingBottom:"2%", fontSize:"110%"}}>Carts: {airport.numberOfCarts} </CardContent>
                             <div style={{paddingLeft:'4%'}}>
-                                <Button style={{fontSize:'100%', paddingLeft:''}} variant="secondary"  className="bg-indigo-500" type='submit'>
+                                <Button style={{fontSize:'100%', paddingLeft:''}} variant="secondary"  className="bg-amber-600" type='submit'>
                                     <Link style={{color:"white" }} to={`/Dashboard/${airport.airportCode}`}>Select</Link>
                                 </Button>
                             </div>

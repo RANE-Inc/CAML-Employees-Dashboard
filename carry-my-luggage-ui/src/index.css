@@ -32,7 +32,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  @apply bg-sky-100;
+  @apply bg-amber-50;
 }
 
 h1 {
@@ -52,7 +52,7 @@ button {
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: #ad6200;
 }
 button:focus,
 button:focus-visible {

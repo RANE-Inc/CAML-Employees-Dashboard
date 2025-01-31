@@ -39,7 +39,7 @@ function ScheduleCart(){
         <div>
             <DropMyMenu/>
 
-            <div style={{fontFamily:'Kanit', position:"fixed", top:"20%", left:'41%'}}>
+            <div style={{fontFamily:'Kanit', position:"fixed", top:"20%", left:'42%'}}>
 
                 <div style={{fontSize:"250%"}}>
                     Schedule Cart {cart.cartNum}
@@ -52,6 +52,7 @@ function ScheduleCart(){
                             id="time"
                             value={selectedTime}
                             onChange={(e) => setSelectedTime(e.target.value)}
+                            className='bg-amber-200'
                         >
                             <option value="1">1:00</option>
                             <option value="2">2:00</option>
@@ -72,6 +73,7 @@ function ScheduleCart(){
                             id="AMPM"
                             value={selectedAMPM}
                             onChange={(e) => setSelectedAMPM(e.target.value)}
+                            className='bg-amber-200'
                         >
                             <option value="1">PM</option>
                             <option value="2">AM</option>
@@ -82,6 +84,7 @@ function ScheduleCart(){
                             id="Start"
                             value={selectedStart}
                             onChange={(e) => setSelectedStart(e.target.value)}
+                            className='bg-amber-200'
                         >
                             <option value="1">Gate A</option>
                             <option value="2">Gate B</option>
@@ -94,6 +97,7 @@ function ScheduleCart(){
                             id="Destination"
                             value={selectedDestination}
                             onChange={(e) => setSelectedDestination(e.target.value)}
+                            className='bg-amber-200'
                         >
                             <option value="1">Gate A</option>
                             <option value="2">Gate B</option>
@@ -104,7 +108,7 @@ function ScheduleCart(){
                     </div>
 
                     <div style={{paddingTop:'8%'}}>
-                    <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-indigo-500" type='submit'>
+                    <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-amber-600" type='submit'>
                         <Link style={{color:"white"}} to={`/Dashboard/${cart.airport}`}>Confirm</Link>
                     </Button>
                     </div>

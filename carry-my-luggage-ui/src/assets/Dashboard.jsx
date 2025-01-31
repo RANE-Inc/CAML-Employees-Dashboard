@@ -42,7 +42,7 @@ function Dashboard() {
                 style={{
                     position: "fixed",
                     top: "9%",
-                    left: "17%",
+                    left: "19%",
                     overflowY: "scroll",
                     maxHeight: "calc(100vh - 10%)",
                 }}
@@ -53,7 +53,7 @@ function Dashboard() {
                 ) : luggageCarts && luggageCarts.length > 0 ? (
                     luggageCarts.map((cart) => (
                         <div key={cart.cartId} className="max-w-xs text-left">
-                            <Card className="bg-indigo-300 h-[160px] w-[360px]">
+                            <Card className="bg-amber-400 h-[160px] w-[360px]">
                                 <CardTitle style={{ paddingLeft: "7%", paddingTop: "3%", fontSize: "160%" }}>
                                     Cart {cart.cartNum}
                                 </CardTitle>
@@ -67,7 +67,7 @@ function Dashboard() {
                                     <Button
                                         style={{ fontSize: '100%' }}
                                         variant="secondary"
-                                        className="bg-indigo-500"
+                                        className="bg-amber-600"
                                         type="submit"
                                     >
                                         <Link style={{color:"white"}} to={`/Cart/${cart.cartId}`}>Select Cart</Link>
