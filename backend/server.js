@@ -97,37 +97,28 @@ app.get('/api/airports', async (req, res) => {
 
 //---Queries for posting to Database---
 app.post('/api/tasks', async (req, res) => {
-  
-  try{
-    const {Airport, cartNum, start, end, Time} = req.body;     //Time is in military, conversion will be done in ui side
+  console.log('Task:', req.body);
+  try {
+      const task = new Task({
+          taskID: req.body.taskID,
+          airport: req.body.airport,
+          airportLoc: req.body.airportLoc,
+          startPoint: req.body.startPoint,
+          CartNum: req.body.CartNum,
+          taskTime: req.body.taskTime,
+          status: req.body.status
+      });
 
-    const task = new Task({
-      airport: Airport,
-      airportLoc: start,
-      startPoint: end,
-      CartNum: cartNum,
-      taskTime: Time,
-      status: "Not Started",
-    });
+      const savedTask = await task.save();
+      console.log("Created Task: ", savedTask);
 
-    res = await task.save();
-    console.log("Created Task: ", res);
-
-    // Task.insertOne({
-    //   airport: Airport,
-    //   airportLoc: GoTo,
-    //   CartNum: cartNum,
-    //   taskTime: Time,
-    //   completed: false,
-    // })
-
-    res.send()
-  }catch(error){
-    console.error("Error posting to database: ", error);
-    res.status(500).send({error: "Internal Server Error"});
+      res.status(201).json({ message: "Task created successfully", task: savedTask });
+  } catch (error) {
+      console.error("Error posting to database: ", error);
+      res.status(500).json({ error: "Internal Server Error" });
   }
+});
 
-})
 
 
 //set up the server

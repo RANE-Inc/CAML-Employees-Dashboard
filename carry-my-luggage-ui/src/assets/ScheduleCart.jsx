@@ -4,36 +4,62 @@ import { Button } from "../components/ui/button";
 import DropMyMenu from '../components/ui/dropMyMenu';
 import{ useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 
 function ScheduleCart(){
-
+    const navigate = useNavigate();
     const [selectedTime, setSelectedTime] = useState('');
     const [selectedAMPM, setSelectedAMPM] = useState('');
     const [selectedStart, setSelectedStart] = useState('');
     const [selectedDestination, setSelectedDestination] = useState('');
-    const [cart, setCart] = useState([]);
+    const [cart, setCart] = useState({});
+    const [error, setError] = useState(null);
+
 
     const { cartId } = useParams();
 
     useEffect(() => {
         axios
-            .get('http://localhost:4000/api/cart', {params: {cartId: cartId}|| {}})
+            .get('http://localhost:4000/api/cart', { params: { cartId: cartId } })
             .then((response) => {
-                console.log("API Response:", response.data); // Debug API data
+                console.log("API Response:", response.data);
                 setCart(response.data);
             })
             .catch((error) => {
                 console.error("API Error:", error);
                 setError("Failed to fetch carts. Please try again later.");
             });
-    }, []);
+    }, [cartId]);
+    
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-    }
 
-    (cart.airport);
+        console.log("Cart:", cart);
+        
+        try {
+            const response = await axios.post('http://localhost:4000/api/tasks', {
+                taskID: cartId, 
+                airport: cart.airport,
+                cartNum: cart.cartNum,
+                startPoint: selectedStart,
+                airportLoc: selectedDestination,
+                taskTime: selectedTime,
+                status: "pending"
+            });
+    
+            console.log("API Response:", response.data);
+            navigate(`/Dashboard/${cart.airport}`);
+        } catch (error) {
+            console.error("API Error:", error);
+            setError("Failed to create task. Please try again later.");
+        }
+    };
+    
+
+    
 
     return(
         <div>
@@ -109,7 +135,7 @@ function ScheduleCart(){
 
                     <div style={{paddingTop:'8%'}}>
                     <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-amber-600" type='submit'>
-                        <Link style={{color:"white"}} to={`/Dashboard/${cart.airport}`}>Confirm</Link>
+                        Confirm
                     </Button>
                     </div>
                 </form>
