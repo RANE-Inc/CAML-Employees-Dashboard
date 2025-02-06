@@ -4,13 +4,46 @@ import dotenv from 'dotenv';
 import { MongoClient } from 'mongodb';
 import cors from 'cors';
 
+import swaggerUI from 'swagger-ui-express';
+import swaggerJsDoc from 'swagger-jsdoc';
+
 const env = dotenv.config();
 
 const PORT_2 = process.env.PORT_2 // port number
 const MONGODB_URL = process.env.MONGODB_URL // mongodb url
 
+// Swagger
+const swaggerAPIDescription = swaggerJsDoc({
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'CAML API',
+      version: '1.0.0',
+      description: 'API for CAML',
+      contact: {
+        name: 'CAML Team',
+        email: '  ',
+      },
+    },
+    servers: [
+      {
+        url: `http://localhost:${PORT_2}`,
+      },
+    ],
+  },
+  apis: ['server.js'],
+});
+
+
+
 const app = express();
 app.use(express.json());
+
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerAPIDescription));
+
+app.get('/api-docs', (req, res) => {
+  res.send(swaggerAPIDescription);
+});
 
 app.use(cors());
 //we already have a database. We need to connect to it
