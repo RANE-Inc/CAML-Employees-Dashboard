@@ -9,5 +9,38 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+
+    <script type="text/javascript" type="text/javascript">
+      const ros = new ROSLIB.Ros({url: "ws://localhost:9090"});
+
+      ros.on("connection", () => {
+        document.getElementById("status").innerHTML = "successful";
+      });
+
+      ros.on("error", (error) => {
+        document.getElementById("status").innerHTML = 'error: (${error})';
+      });
+
+      ros.on("close", () => {
+        document.getElementById("status").innerHTML = "closed";
+      });
+
+      const my_listener = new ROSLIB.TOPIC({
+        ros,
+        name: "/topic",
+        messageType: "std_msgs/String",
+      });
+
+      my_listener.subscribe((message) => {
+        const ul = document.getElementById("messages");
+        const newMessage = document.getElementById("li");
+        newMessage.appendChild(docuument.createTextNode(message.data));
+        ul.appendChild(newMessage);
+      })
+
+  </script>
+
   </body>
 </html>
