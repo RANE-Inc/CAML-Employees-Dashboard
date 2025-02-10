@@ -228,6 +228,19 @@ app.get('/api/airports', async (req, res) => {
   }
 });
 
+app.get('/api/taskFind', async (req, res) => {
+  try {
+    console.log('Searching for task with CartId:', req.query.cartId);
+    const cartTasks = await Task.find({taskID: req.query.cartId});
+    console.log(cartTasks)
+    res.send(cartTasks);
+    console.log('Tasks retrieved');
+  } catch (error) {
+      console.error("Error during aggregation:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
 //---Queries for posting to Database---
 
 /**
