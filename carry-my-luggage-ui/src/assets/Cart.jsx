@@ -100,13 +100,13 @@ function Cart(){
                                         Task {task.taskID}
                                     </CardTitle>
                                     <CardContent style={{ paddingTop:'3%', paddingBottom: "2%", fontSize: "110%" }}>
-                                        Task Start Time: {task.taskTime} 13:00
+                                        Task Start Time: {task.taskTime}
                                     </CardContent>
                                     <CardContent style={{ paddingBottom: "1%", fontSize: "110%" }}>
-                                        Start Location: Gate A
+                                        Start Location: {task.startPoint}
                                     </CardContent>
                                     <CardContent style={{ paddingBottom: "2%", fontSize: "110%" }}>
-                                        Destination: Gate C
+                                        Destination: {task.airportLoc}
                                     </CardContent>
                                     <CardContent style={{ paddingBottom: "2%", fontSize: "110%" }}>
                                         Status: {task.status}

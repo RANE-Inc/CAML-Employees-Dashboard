@@ -44,10 +44,10 @@ function ScheduleCart(){
                 taskID: cartId, 
                 airport: cart.airport,
                 cartNum: cart.cartNum,
-                startPoint: selectedStart,
-                airportLoc: selectedDestination,
-                taskTime: selectedTime,
-                status: "pending"
+                startPoint: selectedStart || "Gate A",
+                airportLoc: selectedDestination || "Gate A",
+                taskTime: selectedTime && selectedAMPM ? `${selectedTime} ${selectedAMPM}` : "1:00 PM",
+                status: "Pending"
             });
     
             console.log("API Response:", response.data);
@@ -80,18 +80,18 @@ function ScheduleCart(){
                             onChange={(e) => setSelectedTime(e.target.value)}
                             className='bg-amber-200'
                         >
-                            <option value="1">1:00</option>
-                            <option value="2">2:00</option>
-                            <option value="3">3:00</option>
-                            <option value="4">4:00</option>
-                            <option value="5">5:00</option>
-                            <option value="6">6:00</option>
-                            <option value="7">7:00</option>
-                            <option value="8">8:00</option>
-                            <option value="9">9:00</option>
-                            <option value="10">10:00</option>
-                            <option value="11">11:00</option>
-                            <option value="12">12:00</option>
+                            <option value="1:00">1:00</option>
+                            <option value="2:00">2:00</option>
+                            <option value="3:00">3:00</option>
+                            <option value="4:00">4:00</option>
+                            <option value="5:00">5:00</option>
+                            <option value="6:00">6:00</option>
+                            <option value="7:00">7:00</option>
+                            <option value="8:00">8:00</option>
+                            <option value="9:00">9:00</option>
+                            <option value="10:00">10:00</option>
+                            <option value="11:00">11:00</option>
+                            <option value="12:00">12:00</option>
                         </select>
 
                         <label htmlFor='AMPM' style={{paddingTop:'3%'}}>Select AM or PM</label>
@@ -101,8 +101,8 @@ function ScheduleCart(){
                             onChange={(e) => setSelectedAMPM(e.target.value)}
                             className='bg-amber-200'
                         >
-                            <option value="1">PM</option>
-                            <option value="2">AM</option>
+                            <option value="PM">PM</option>
+                            <option value="AM">AM</option>
                         </select>
 
                         <label htmlFor='Start' style={{paddingTop:'3%'}}>Select Start Location</label>
@@ -112,23 +112,26 @@ function ScheduleCart(){
                             onChange={(e) => setSelectedStart(e.target.value)}
                             className='bg-amber-200'
                         >
-                            <option value="1">Gate A</option>
-                            <option value="2">Gate B</option>
-                            <option value="3">Gate C</option>
-                            <option value="4">Charging Station</option>
+                            <option value="Gate A">Gate A</option>
+                            <option value="Gate B">Gate B</option>
+                            <option value="Gate C">Gate C</option>
+                            <option value="Charging Station">Charging Station</option>
                         </select>
 
                         <label htmlFor='Destination' style={{paddingTop:'3%'}}>Select Destination</label>
                         <select
                             id="Destination"
                             value={selectedDestination}
-                            onChange={(e) => setSelectedDestination(e.target.value)}
+                            
+                            onChange={(e) => {
+                                setSelectedDestination(e.target.value)
+                            }}
                             className='bg-amber-200'
                         >
-                            <option value="1">Gate A</option>
-                            <option value="2">Gate B</option>
-                            <option value="3">Gate C</option>
-                            <option value="4">Charging Station</option>
+                            <option value="Gate A">Gate A</option>
+                            <option value="Gate B">Gate B</option>
+                            <option value="Gate C">Gate C</option>
+                            <option value="Charging Station">Charging Station</option>
                         </select>
 
                     </div>
