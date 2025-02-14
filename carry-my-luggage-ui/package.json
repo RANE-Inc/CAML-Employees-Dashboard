@@ -20,6 +20,7 @@
     "debug": "~2.6.9",
     "http-errors": "~1.6.3",
     "jade": "^1.9.2",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.453.0",
     "morgan": "~1.9.1",
     "postcss": "^8.4.49",

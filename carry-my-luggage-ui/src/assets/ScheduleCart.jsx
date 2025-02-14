@@ -1,54 +1,70 @@
-import React from 'react';
-import {Link, useParams} from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import api from '../api/axiosInstance'; // Import axios instance
 import { Button } from "../components/ui/button";
 import DropMyMenu from '../components/ui/dropMyMenu';
-import{ useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
-
-
-function ScheduleCart(){
+function ScheduleCart() {
     const navigate = useNavigate();
+    const { cartId } = useParams();
     const [selectedTime, setSelectedTime] = useState('');
     const [selectedAMPM, setSelectedAMPM] = useState('');
     const [selectedStart, setSelectedStart] = useState('');
     const [selectedDestination, setSelectedDestination] = useState('');
     const [cart, setCart] = useState({});
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-
-    const { cartId } = useParams();
-
+    // Check authentication on component mount
     useEffect(() => {
-        axios
-            .get('http://localhost:4000/api/cart', { params: { cartId: cartId } })
+        api.get("/check-auth", { withCredentials: true })
+        .then(response => {
+            console.log("API Response:", response.data);  // Log response to verify the role
+            if (response.data.role.toLowerCase() !== "admin") {
+                navigate("/locations");
+            } else {
+                setLoading(false);
+            }
+        })
+        .catch(error => {
+            console.error("Auth Check Failed:", error);  // Log error if check fails
+            navigate("/locations");
+        });
+    }, [navigate]);    
+    
+
+    // Fetch cart details
+    useEffect(() => {
+        if (!cartId) return;
+        
+        api.get('/api/cart', { params: { cartId } }) // Use api instead of axios
             .then((response) => {
                 console.log("API Response:", response.data);
                 setCart(response.data);
             })
             .catch((error) => {
                 console.error("API Error:", error);
-                setError("Failed to fetch carts. Please try again later.");
-            });
+                setError("Failed to fetch cart details. Please try again later.");
+            })
+            .finally(() => setLoading(false));
     }, [cartId]);
-    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        console.log("Cart:", cart);
-        
         try {
-            const response = await axios.post('http://localhost:4000/api/tasks', {
-                taskID: cartId, 
-                airport: cart.airport,
-                cartNum: cart.cartNum,
-                startPoint: selectedStart || "Gate A",
-                airportLoc: selectedDestination || "Gate A",
-                taskTime: selectedTime && selectedAMPM ? `${selectedTime} ${selectedAMPM}` : "1:00 PM",
-                status: "Pending"
-            });
+            const response = await api.post( // Use api instead of axios
+                '/api/tasks',
+                {
+                    taskID: cartId, 
+                    airport: cart.airport,
+                    CartNum: cart.cartNum,
+                    startPoint: selectedStart || "Gate A",
+                    airportLoc: selectedDestination || "Gate A",
+                    taskTime: selectedTime && selectedAMPM ? `${selectedTime} ${selectedAMPM}` : "1:00 PM",
+                    status: "Pending"
+                }
+            );
     
             console.log("API Response:", response.data);
             navigate(`/Dashboard/${cart.airport}`);
@@ -57,22 +73,20 @@ function ScheduleCart(){
             setError("Failed to create task. Please try again later.");
         }
     };
-    
 
-    
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p style={{ color: "red" }}>{error}</p>;
 
-    return(
+    return (
         <div>
-            <DropMyMenu/>
+            <DropMyMenu />
 
-            <div style={{fontFamily:'Kanit', position:"fixed", top:"20%", left:'42%'}}>
+            <div style={{ fontFamily: 'Kanit', position: "fixed", top: "20%", left: '42%' }}>
+                <div style={{ fontSize: "250%" }}>Schedule Cart {cart.cartNum}</div>
 
-                <div style={{fontSize:"250%"}}>
-                    Schedule Cart {cart.cartNum}
-                </div>
-
-                <form className="grid grid-cols-1" style={{paddingTop:'5%'}} onSubmit={handleSubmit}>
-                    <div className="grid grid-4" style={{fontSize:"150%", paddingTop:'5%'}}>
+                <form className="grid grid-cols-1" style={{ paddingTop: '5%' }} onSubmit={handleSubmit}>
+                    <div className="grid grid-4" style={{ fontSize: "150%", paddingTop: '5%' }}>
+                        {/* Select Time */}
                         <label htmlFor='time'>Select Time</label>
                         <select
                             id="time"
@@ -80,69 +94,57 @@ function ScheduleCart(){
                             onChange={(e) => setSelectedTime(e.target.value)}
                             className='bg-amber-200'
                         >
-                            <option value="1:00">1:00</option>
-                            <option value="2:00">2:00</option>
-                            <option value="3:00">3:00</option>
-                            <option value="4:00">4:00</option>
-                            <option value="5:00">5:00</option>
-                            <option value="6:00">6:00</option>
-                            <option value="7:00">7:00</option>
-                            <option value="8:00">8:00</option>
-                            <option value="9:00">9:00</option>
-                            <option value="10:00">10:00</option>
-                            <option value="11:00">11:00</option>
-                            <option value="12:00">12:00</option>
+                            {[...Array(12)].map((_, i) => (
+                                <option key={i + 1} value={`${i + 1}:00`}>{i + 1}:00</option>
+                            ))}
                         </select>
 
-                        <label htmlFor='AMPM' style={{paddingTop:'3%'}}>Select AM or PM</label>
+                        {/* Select AM/PM */}
+                        <label htmlFor='AMPM' style={{ paddingTop: '3%' }}>Select AM or PM</label>
                         <select
                             id="AMPM"
                             value={selectedAMPM}
                             onChange={(e) => setSelectedAMPM(e.target.value)}
                             className='bg-amber-200'
                         >
-                            <option value="PM">PM</option>
                             <option value="AM">AM</option>
+                            <option value="PM">PM</option>
                         </select>
 
-                        <label htmlFor='Start' style={{paddingTop:'3%'}}>Select Start Location</label>
+                        {/* Select Start Location */}
+                        <label htmlFor='Start' style={{ paddingTop: '3%' }}>Select Start Location</label>
                         <select
                             id="Start"
                             value={selectedStart}
                             onChange={(e) => setSelectedStart(e.target.value)}
                             className='bg-amber-200'
                         >
-                            <option value="Gate A">Gate A</option>
-                            <option value="Gate B">Gate B</option>
-                            <option value="Gate C">Gate C</option>
-                            <option value="Charging Station">Charging Station</option>
+                            {["Gate A", "Gate B", "Gate C", "Charging Station"].map((loc) => (
+                                <option key={loc} value={loc}>{loc}</option>
+                            ))}
                         </select>
 
-                        <label htmlFor='Destination' style={{paddingTop:'3%'}}>Select Destination</label>
+                        {/* Select Destination */}
+                        <label htmlFor='Destination' style={{ paddingTop: '3%' }}>Select Destination</label>
                         <select
                             id="Destination"
                             value={selectedDestination}
-                            
-                            onChange={(e) => {
-                                setSelectedDestination(e.target.value)
-                            }}
+                            onChange={(e) => setSelectedDestination(e.target.value)}
                             className='bg-amber-200'
                         >
-                            <option value="Gate A">Gate A</option>
-                            <option value="Gate B">Gate B</option>
-                            <option value="Gate C">Gate C</option>
-                            <option value="Charging Station">Charging Station</option>
+                            {["Gate A", "Gate B", "Gate C", "Charging Station"].map((loc) => (
+                                <option key={loc} value={loc}>{loc}</option>
+                            ))}
                         </select>
-
                     </div>
 
-                    <div style={{paddingTop:'8%'}}>
-                    <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-amber-600" type='submit'>
-                        Confirm
-                    </Button>
+                    {/* Confirm Button */}
+                    <div style={{ paddingTop: '8%' }}>
+                        <Button style={{ fontSize: '150%' }} variant="secondary" className="bg-amber-600" type='submit'>
+                            Confirm
+                        </Button>
                     </div>
                 </form>
-
             </div>
         </div>
     );

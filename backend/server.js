@@ -3,6 +3,11 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { MongoClient } from 'mongodb';
 import cors from 'cors';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { randomBytes } from 'crypto';
+import { authMiddleware, adminMiddleware } from './middleware.js'
+import cookieParser from 'cookie-parser';
 
 import swaggerUI from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
@@ -41,7 +46,14 @@ app.use(express.json());
 
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerAPIDescription));
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", // Specify frontend URL
+  credentials: true, // Allow cookies and authentication headers
+  methods: "GET,POST,PUT,DELETE", // Allowed HTTP methods
+  allowedHeaders: "Content-Type,Authorization", // Allowed headers
+}));
+app.use(cookieParser());
+
 //we already have a database. We need to connect to it
 
 mongoose.connect(MONGODB_URL)
@@ -81,11 +93,19 @@ const taskSchema = new Schema({
   status: String    //Enum possibly
 })
 
+// Define a user schema
+const UserSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  role: { type: String, enum: ['admin', 'user'], default: 'user' },
+  apiKeys: [String],
+});
+
 // Compile the model
 const Cart = mongoose.model('carts', cartSchema);
 const Airport = mongoose.model('airports', airportSchema);
 const Task = mongoose.model('tasks', taskSchema);
-
+const User = mongoose.model('users', UserSchema);
 
 //---Queries for getting from Database---
 //find all carts
@@ -228,6 +248,7 @@ app.get('/api/airports', async (req, res) => {
   }
 });
 
+
 app.get('/api/taskFind', async (req, res) => {
   try {
     console.log('Searching for task with CartId:', req.query.cartId);
@@ -320,7 +341,8 @@ app.get('/api/taskFind', async (req, res) => {
  *       500:
  *         description: Internal Server Error.
  */
-app.post('/api/tasks', async (req, res) => {
+
+app.post('/api/tasks', authMiddleware, adminMiddleware, async (req, res) => {
   console.log('Task:', req.body);
   try {
       const task = new Task({
@@ -340,6 +362,142 @@ app.post('/api/tasks', async (req, res) => {
   } catch (error) {
       console.error("Error posting to database: ", error);
       res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post('/register', async (req, res) => {
+  try {
+    const { username, password, role } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const user = new User({ username, password: hashedPassword, role });
+    await user.save();
+
+    // Generate Tokens
+    const accessToken = jwt.sign({ userId: user._id, role: user.role }, "access_secret", { expiresIn: "15m" }); // 15 min expiry
+    const refreshToken = jwt.sign({ userId: user._id }, "refresh_secret", { expiresIn: "7d" }); // 7-day expiry
+
+    // Store refresh token in HTTP-only cookie
+    res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "Strict" });
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production", 
+      sameSite: "Strict"
+  });
+    // Send access token (optional, can be stored in memory on frontend)
+    res.json({ accessToken });
+  } catch (error) {
+    res.status(500).json({ error: "Registration failed" });
+  }
+});
+
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  console.log('Login:', req.body);
+
+  try {
+      const user = await User.findOne({ username });
+      if (!user || !(await bcrypt.compare(password, user.password))) {
+          return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // Generate Tokens
+      console.log(user);
+      const accessToken = jwt.sign(
+          { userId: user._id, role: user.role }, 
+          process.env.ACCESS_SECRET || "access_secret", 
+          { expiresIn: "15m" } // Short expiry
+      );
+
+      const refreshToken = jwt.sign(
+          { userId: user._id }, 
+          process.env.REFRESH_SECRET || "refresh_secret", 
+          { expiresIn: "7d" } // Longer expiry
+      );
+
+      // Store Refresh Token in HTTP-only Cookie
+      res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "Lax",
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === "production", 
+        sameSite: "Strict"
+    });
+
+      res.json({ accessToken });
+
+  } catch (error) {
+      console.error("Login Error:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+app.post('/refresh-token', (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) return res.status(401).json({ message: "No refresh token" });
+
+  try {
+      const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET || "refresh_secret");
+
+      // Generate new access token
+      const accessToken = jwt.sign(
+          { userId: decoded.userId, role: decoded.role },
+          process.env.ACCESS_SECRET || "access_secret",
+          { expiresIn: "15m" }
+      );
+
+      res.json({ accessToken });
+
+  } catch (error) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+  }
+});
+
+app.post('/logout', (req, res) => {
+    res.clearCookie("refreshToken", { httpOnly: true, sameSite: "Lax" });
+    res.json({ message: "Logged out" });
+});
+
+
+app.post('/generate-api-key', authMiddleware, adminMiddleware, async (req, res) => {
+  const apiKey = randomBytes(32).toString('hex');
+  await User.findByIdAndUpdate(req.user.userId, { $push: { apiKeys: apiKey } });
+  res.json({ apiKey });
+});
+
+app.get('/protected', authMiddleware, (req, res) => {
+  res.json({ message: 'You have access' });
+});
+
+app.use((req, res, next) => {
+  console.log("Headers:", req.headers);
+  console.log("Body:", req.body);
+  console.log("Cookies:", req.cookies);
+  next();
+});
+
+app.get('/check-auth', (req, res) => {
+  const token = req.cookies.accessToken || req.headers['authorization']?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Not authenticated' });
+
+  try {
+      const decoded = jwt.verify(token, 'access_secret');
+      console.log("Decoded token:", decoded);  // Log the decoded token to check its contents
+      req.user = decoded; // Store the decoded token in req.user
+
+      if (req.user.role !== 'admin') {
+          return res.status(403).json({ message: 'Forbidden: Admins only' });
+      }
+
+      res.json({ role: req.user.role });
+  } catch (err) {
+      console.error("Token verification failed:", err);
+      res.status(403).json({ message: 'Invalid token' });
   }
 });
 
