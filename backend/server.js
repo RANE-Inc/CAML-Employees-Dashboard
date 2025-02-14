@@ -368,28 +368,31 @@ app.post('/api/tasks', authMiddleware, adminMiddleware, async (req, res) => {
 app.post('/register', async (req, res) => {
   try {
     const { username, password, role } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
     
+
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashedPassword, role });
+
     await user.save();
 
     // Generate Tokens
-    const accessToken = jwt.sign({ userId: user._id, role: user.role }, "access_secret", { expiresIn: "15m" }); // 15 min expiry
-    const refreshToken = jwt.sign({ userId: user._id }, "refresh_secret", { expiresIn: "7d" }); // 7-day expiry
+    const accessToken = jwt.sign({ userId: user._id, role: user.role }, "access_secret", { expiresIn: "15m" });
+    const refreshToken = jwt.sign({ userId: user._id }, "refresh_secret", { expiresIn: "7d" });
 
     // Store refresh token in HTTP-only cookie
     res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "Strict" });
     res.cookie("accessToken", accessToken, {
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === "production", 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "Strict"
-  });
-    // Send access token (optional, can be stored in memory on frontend)
+    });
+
     res.json({ accessToken });
   } catch (error) {
     res.status(500).json({ error: "Registration failed" });
   }
 });
+
 
 
 app.post('/login', async (req, res) => {
@@ -459,8 +462,12 @@ app.post('/refresh-token', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-    res.clearCookie("refreshToken", { httpOnly: true, sameSite: "Lax" });
-    res.json({ message: "Logged out" });
+  // Clear the cookies
+  res.clearCookie("refreshToken", { httpOnly: true, sameSite: "Strict" });
+  res.clearCookie("accessToken", { httpOnly: true, sameSite: "Strict" });
+
+  // Send a response to confirm the user has been logged out
+  res.json({ message: "Logged out successfully" });
 });
 
 
@@ -490,6 +497,7 @@ app.get('/check-auth', (req, res) => {
       console.log("Decoded token:", decoded);  // Log the decoded token to check its contents
       req.user = decoded; // Store the decoded token in req.user
 
+      
       if (req.user.role !== 'admin') {
           return res.status(403).json({ message: 'Forbidden: Admins only' });
       }
