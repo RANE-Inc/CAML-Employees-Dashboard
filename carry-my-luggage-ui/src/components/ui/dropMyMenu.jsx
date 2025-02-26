@@ -42,6 +42,11 @@ function DropMyMenu() {
                           <Link style={{ color: "white" }} to="/Dashboard/YOW">Dashboard</Link>
                       </Button>
                   </DropdownMenuItem>
+                  <DropdownMenuItem className="bg-amber-300">
+                      <Button style={{ fontSize: "120%" }} variant="secondary" className="bg-amber-600">
+                          <Link style={{ color: "white" }} to="/AdminDashboard">Admin</Link>
+                      </Button>
+                  </DropdownMenuItem>
                   {/* Sign-out Button */}
                   <DropdownMenuItem className="bg-amber-300">
                       <Button 

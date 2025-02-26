@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import api from '../api/axiosInstance'; // Import axios instance
 import { Button } from "../components/ui/button";
 import DropMyMenu from "../components/ui/dropMyMenu";
 
@@ -10,6 +11,23 @@ function Signup() {
     const [pwConfirm, setPwConfirm] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        api.get("/check-auth", { withCredentials: true })
+        .then(response => {
+            console.log("API Response:", response.data);  // Log response to verify the role
+            if (response.data.role.toLowerCase() !== "admin") {
+                navigate("/locations");
+            } else {
+                setLoading(false);
+            }
+        })
+        .catch(error => {
+            console.error("Auth Check Failed:", error);  // Log error if check fails
+            navigate("/locations");
+        });
+    }, [navigate]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -21,16 +39,16 @@ function Signup() {
         }
 
         axios.post("http://localhost:4000/register", { username, password })
-            .then(() => navigate("/Locations"))
+            .then(() => navigate("/AdminDashboard"))
             .catch(() => setError("Signup failed. Try again."));
     };
 
     return (
-        <div style={{ fontFamily: "Kanit", position: "fixed", top: "20%", left: "37%" }}>
-            <div style={{ fontSize: "250%" }}>Welcome To</div>
-            <div style={{ fontSize: "250%" }}>CAML Autonomous Mobility Lift</div>
+        <div >
+            <DropMyMenu />
 
-            <form className="grid grid-cols-1" style={{ paddingTop: "5%" }} onSubmit={handleSubmit}>
+
+            <form className="grid grid-cols-1" style={{ paddingTop: "5%", fontFamily: "Kanit", position: "fixed", top: "18%", left: "44%" }} onSubmit={handleSubmit}>
                 <div style={{ paddingTop: "5%" }}>
                     <input
                         style={{ fontSize: "140%" }}
@@ -68,7 +86,7 @@ function Signup() {
 
                 <div style={{ paddingTop: "8%" }}>
                     <Button style={{ fontSize: "150%" }} variant="secondary" className="bg-amber-600" type="submit">
-                        Sign Up
+                        Create User
                     </Button>
                 </div>
             </form>

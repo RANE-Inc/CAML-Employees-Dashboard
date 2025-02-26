@@ -18,11 +18,11 @@ function Home(){
                     <Link style={{color:"white"}} to="/Login">Login</Link>
                 </Button>
                 </div>
-                <div style={{paddingTop:'5%'}}>
+                {/* <div style={{paddingTop:'5%'}}>
                 <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-amber-600">
                     <Link style={{color:"white"}} to="/Signup">Sign Up</Link>
                 </Button>
-                </div>
+                </div> */}
             </div>
         </div>
     );

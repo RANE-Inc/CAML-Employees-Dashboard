@@ -262,6 +262,17 @@ app.get('/api/taskFind', async (req, res) => {
   }
 });
 
+app.get('/api/allUsers', async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.send(users);
+    console.log('Users retrieved');
+  } catch (error) {
+      console.error("Error during aggregation:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
 //---Queries for posting to Database---
 
 /**
