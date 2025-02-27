@@ -140,7 +140,7 @@ function ScheduleCart() {
 
                     {/* Confirm Button */}
                     <div style={{ paddingTop: '8%' }}>
-                        <Button style={{ fontSize: '150%' }} variant="secondary" className="bg-amber-600" type='submit'>
+                        <Button style={{ fontSize: '150%', color:"White" }} variant="secondary" className="bg-amber-600" type='submit'>
                             Confirm
                         </Button>
                     </div>

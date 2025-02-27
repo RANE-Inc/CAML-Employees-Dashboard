@@ -386,19 +386,19 @@ app.post('/register', async (req, res) => {
 
     await user.save();
 
-    // Generate Tokens
-    const accessToken = jwt.sign({ userId: user._id, role: user.role }, "access_secret", { expiresIn: "15m" });
-    const refreshToken = jwt.sign({ userId: user._id }, "refresh_secret", { expiresIn: "7d" });
+    // Generate Tokens (no longer needed when creating new user)
+    //const accessToken = jwt.sign({ userId: user._id, role: user.role }, "access_secret", { expiresIn: "15m" });
+    //const refreshToken = jwt.sign({ userId: user._id }, "refresh_secret", { expiresIn: "7d" });
 
     // Store refresh token in HTTP-only cookie
-    res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "Strict" });
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict"
-    });
+    // res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "Strict" });
+    // res.cookie("accessToken", accessToken, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: "Strict"
+    // });
 
-    res.json({ accessToken });
+    res.json({});
   } catch (error) {
     res.status(500).json({ error: "Registration failed" });
   }

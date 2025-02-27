@@ -33,26 +33,26 @@ function DropMyMenu() {
               </DropdownMenuTrigger>
               <DropdownMenuContent style={{ fontSize: "125%" }} className="bg-amber-400">
                   <DropdownMenuItem className="bg-amber-300">
-                      <Button style={{ fontSize: "120%" }} variant="secondary" className="bg-amber-600">
+                      <Button style={{ fontSize: "120%" }} variant="secondary" className="w-[110px] bg-amber-600">
                           <Link style={{ color: "white" }} to="/Locations">Locations</Link>
                       </Button>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="bg-amber-300">
-                      <Button style={{ fontSize: "120%" }} variant="secondary" className="bg-amber-600">
+                      <Button style={{ fontSize: "120%" }} variant="secondary" className="w-[110px] bg-amber-600">
                           <Link style={{ color: "white" }} to="/Dashboard/YOW">Dashboard</Link>
                       </Button>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="bg-amber-300">
-                      <Button style={{ fontSize: "120%" }} variant="secondary" className="bg-amber-600">
+                      <Button style={{ fontSize: "120%" }} variant="secondary" className="w-[110px] bg-amber-600">
                           <Link style={{ color: "white" }} to="/AdminDashboard">Admin</Link>
                       </Button>
                   </DropdownMenuItem>
                   {/* Sign-out Button */}
                   <DropdownMenuItem className="bg-amber-300">
                       <Button 
-                          style={{ fontSize: "120%" }} 
+                          style={{ fontSize: "120%", color:"White" }} 
                           variant="secondary"  
-                          className="bg-amber-600"
+                          className="w-[110px] bg-amber-600"
                           onClick={handleSignOut} // Call the sign-out function
                       >
                           Sign Out

@@ -53,24 +53,38 @@ function AdminDashboard() {
     return (
         <div>
             <DropMyMenu />
-            <div style={{ position: "fixed", top: "2%", left: "45%", fontSize: '250%' }}>
+            <b style={{ position: "fixed", color:"SaddleBrown", top: "2%", left: "45%", fontSize: '250%' }}>
                 Admin Dashboard
-            </div>
-            <div style={{position:"fixed", top: "12%", left:"20%"}}>
+            </b>
+            <div style={{position:"fixed", top: "12%", left:"45%"}}>
                 <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-amber-600">
                     <Link style={{color:"white"}} to="/Signup">Create New User</Link>
                 </Button>
             </div>
-            <div style={{position:"fixed", top: "18%", left:"20%", fontSize:"175%"}}>
-                Users
-            </div>
-            <Table style={{position:"fixed", top: "22%", left:"19%", fontSize:"175%"}}>
+            <b style={{position:"fixed", color:"SaddleBrown", top: "12%", left:"20%", fontSize:"185%"}}>
+                All Users
+            </b>
+            <Table className="w-[890px]" style={{position:"fixed", top: "20%", left:"19%", fontSize:"175%"}}>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Username</TableHead>
-                        <TableHead>Admin Privileges</TableHead>
+                        <TableHead className="w-[400px] text-left" style={{color:"Black", fontSize:"115%"}}>Username</TableHead>
+                        <TableHead className="w-[250px]" style={{color:"Black", fontSize:"115%"}}>Privileges</TableHead>
+                        <TableHead style={{color:"Black", fontSize:"115%"}}>Toggle Admin</TableHead>
                     </TableRow>
                 </TableHeader>
+                <TableBody>
+                    {users.map((user) =>
+                        <TableRow >
+                            <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{user.username}</TableCell>
+                            <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{user.role}</TableCell>
+                            <TableCell className="text-centered" style={{}}>
+                                <Button style={{fontSize:'70%', color:"white"}} variant="secondary"  className="bg-amber-600">
+                                    Toggle
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
             </Table>
 
 

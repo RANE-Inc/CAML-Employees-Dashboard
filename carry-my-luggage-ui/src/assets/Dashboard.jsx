@@ -34,9 +34,9 @@ function Dashboard() {
     return (
         <div>
             <DropMyMenu />
-            <div style={{ position: "fixed", top: "2%", left: "45%", fontSize: '250%' }}>
+            <b style={{ position: "fixed", color:"SaddleBrown", top: "2%", left: "45%", fontSize: '250%' }}>
                 {airportCode} Airport
-            </div>
+            </b>
 
             <div
                 style={{

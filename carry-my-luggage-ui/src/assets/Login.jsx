@@ -26,8 +26,12 @@ function Login() {
 
     return (
         <div style={{ fontFamily: 'Kanit', position: "fixed", top: "20%", left: '37%' }}>
-            <div style={{ fontSize: "250%" }}>Welcome To</div>
-            <div style={{ fontSize: "250%" }}>CAML Autonomous Mobility Lift</div>
+            <div style={{fontSize:"250%", color:"SaddleBrown"}}>
+                Welcome To
+            </div>
+            <div style={{fontSize:"250%", color:"SaddleBrown"}}>
+                CAML Autonomous Mobility Lift  
+            </div>
             <form className="grid grid-cols-1" style={{ paddingTop: '5%' }} onSubmit={handleSubmit}>
                 <div style={{ paddingTop: "5%" }}>
                     <input

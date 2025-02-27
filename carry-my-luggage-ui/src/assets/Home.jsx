@@ -6,10 +6,10 @@ import { Button } from "../components/ui/button";
 function Home(){
     return(
         <div style={{fontFamily:'Kanit', position:"fixed", top:"20%", left:'37%'}}>
-            <div style={{fontSize:"250%"}}>
+            <div style={{fontSize:"250%", color:"SaddleBrown"}}>
                 Welcome To
             </div>
-            <div style={{fontSize:"250%"}}>
+            <div style={{fontSize:"250%", color:"SaddleBrown"}}>
                 CAML Autonomous Mobility Lift  
             </div>
             <div className="grid grid-cols-1" style={{paddingTop:'15%'}}>
