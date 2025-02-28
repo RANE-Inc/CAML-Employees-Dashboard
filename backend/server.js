@@ -248,6 +248,16 @@ app.get('/api/airports', async (req, res) => {
   }
 });
 
+app.get('/api/apikey', async (req, res) => {
+  apiKey = 123456;
+  if (req.query.apiKey == apiKey) {
+    res.send({message: "API Key is valid"});
+  }
+  else {
+    res.send({message: "API Key is invalid"});
+  }
+});
+
 
 app.get('/api/taskFind', async (req, res) => {
   try {
