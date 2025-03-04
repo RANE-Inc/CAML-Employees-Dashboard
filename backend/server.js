@@ -530,7 +530,24 @@ app.get('/check-auth', (req, res) => {
   }
 });
 
+//---Queries for deleting from Database---
+app.delete('/api/deleteUser/:username', async(req, res) => {
+  console.log('Deleting User')
+  try{
+    console.log(req.params.username)
+    const usernameToDel = req.params.username;
+    const result = await User.deleteOne({username: usernameToDel});
 
+    if(result.deletedCount === 0){
+      return res.status(404).json({message: "User not found."});
+    }
+
+    res.json({message:"User succesfully deleted."});
+  }catch (err){
+    console.log("User not successfully deleted");
+    res.status(500).json({err});
+  }
+})
 
 //set up the server
 

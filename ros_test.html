@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+</head>
+<body>
+    <p>Message: <span id="message"></span></p>
+    <script src="https://unpkg.com/roslib@1.4.1/build/roslib.js"></script>
+    <script>
+        var ros = new ROSLIB.Ros({
+            url: 'ws://localhost:9090'
+        });
+
+        var chatter_topic = ros.Topic({
+            name: '/luggage_av/map',
+            messageType: 'nav_msgs/OccupancyGrid'
+        });
+
+        chatter_topic.subscribe((message) => {
+            document.getElementById("message").innerText = JSON.stringify(message);
+            
+            // s = "\n"
+            
+            // message.data.forEach((currentValue, index, arr) => {
+            //     s += "\t- " +  currentValue + "\n";
+            // })
+
+            // document.getElementById("message").innerText = s;
+        });
+
+    </script>
+</body>
+</html>

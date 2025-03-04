@@ -30,7 +30,7 @@
       const my_listener = new ROSLIB.TOPIC({
         ros,
         name: "/luggage_av/map",
-        messageType: "std_msgs/String",
+        messageType: "nav_msgs/OccupancyGrid",
       });
 
       my_listener.subscribe((message) => {

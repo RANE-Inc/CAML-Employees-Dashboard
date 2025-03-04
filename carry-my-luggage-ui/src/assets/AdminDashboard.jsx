@@ -46,9 +46,26 @@ function AdminDashboard() {
             })
             .catch((error) => {
                 console.error("API Error:", error);
-                setError("Failed to fetch carts. Please try again later.");
+                setError("Failed to fetch users. Please try again later.");
             });
     }, []);
+
+    const removeUser = async(username) => {
+        axios
+            .delete(`http://localhost:4000/api/deleteUser/${username}`)
+            .then((response) => {
+                console.log("API Response: ", response.data);
+                alert("User Succesfully deleted.");
+                window.location.reload();
+            }).catch((error) => {
+                console.error("API Error:",error);
+                alert("Error: ",error);
+        });
+    }
+
+    const toggleAdmin = async(username) => {
+        alert("Toggle admin function is not implemented yet.")
+    }
 
     return (
         <div>
@@ -56,7 +73,7 @@ function AdminDashboard() {
             <b style={{ position: "fixed", color:"SaddleBrown", top: "2%", left: "45%", fontSize: '250%' }}>
                 Admin Dashboard
             </b>
-            <div style={{position:"fixed", top: "12%", left:"45%"}}>
+            <div style={{position:"fixed", top: "12%", left:"52%"}}>
                 <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-amber-600">
                     <Link style={{color:"white"}} to="/Signup">Create New User</Link>
                 </Button>
@@ -64,12 +81,12 @@ function AdminDashboard() {
             <b style={{position:"fixed", color:"SaddleBrown", top: "12%", left:"20%", fontSize:"185%"}}>
                 All Users
             </b>
-            <Table className="w-[890px]" style={{position:"fixed", top: "20%", left:"19%", fontSize:"175%"}}>
+            <Table className="w-[1000px]" style={{position:"fixed", top: "20%", left:"19%", fontSize:"175%"}}>
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[400px] text-left" style={{color:"Black", fontSize:"115%"}}>Username</TableHead>
                         <TableHead className="w-[250px]" style={{color:"Black", fontSize:"115%"}}>Privileges</TableHead>
-                        <TableHead style={{color:"Black", fontSize:"115%"}}>Toggle Admin</TableHead>
+                        <TableHead style={{color:"Black", fontSize:"115%"}}>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -77,9 +94,15 @@ function AdminDashboard() {
                         <TableRow >
                             <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{user.username}</TableCell>
                             <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{user.role}</TableCell>
-                            <TableCell className="text-centered" style={{}}>
-                                <Button style={{fontSize:'70%', color:"white"}} variant="secondary"  className="bg-amber-600">
-                                    Toggle
+                            <TableCell className="text-centered">
+                                <Button onClick={() => toggleAdmin(user.username)} style={{fontSize:'70%', color:"white"}} variant="secondary" className="bg-amber-600">
+                                    Toggle Admin
+                                </Button>
+                                {/*<Button onClick={changePassword} style={{fontSize:'70%', color:"white"}} variant="secondary" className="bg-red-700">
+                                    Change Password
+                                </Button>*/}
+                                <Button onClick={() => removeUser(user.username)} style={{fontSize:'70%', color:"white", transform:"translateX(5%)"}} variant="secondary" className="bg-red-700">
+                                    Remove User
                                 </Button>
                             </TableCell>
                         </TableRow>
