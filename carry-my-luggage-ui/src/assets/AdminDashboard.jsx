@@ -59,12 +59,21 @@ function AdminDashboard() {
                 window.location.reload();
             }).catch((error) => {
                 console.error("API Error:",error);
-                alert("Error: ",error);
+                alert("Error: " + error);
         });
     }
 
     const toggleAdmin = async(username) => {
-        alert("Toggle admin function is not implemented yet.")
+        axios
+            .patch(`http://localhost:4000/api/toggleAdmin/${username}`)
+            .then((response) => {
+                console.log("API Response: ", response.data);
+                alert("Role Successfully Toggled.");
+                window.location.reload();
+            }).catch((error) => {
+                console.error("API Error:",error);
+                alert("Error: " + error.message);
+        });
     }
 
     return (

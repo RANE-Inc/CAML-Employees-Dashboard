@@ -49,7 +49,7 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerAPIDescription));
 app.use(cors({
   origin: "http://localhost:5173", // Specify frontend URL
   credentials: true, // Allow cookies and authentication headers
-  methods: "GET,POST,PUT,DELETE", // Allowed HTTP methods
+  methods: "GET,POST,PATCH,PUT,DELETE", // Allowed HTTP methods
   allowedHeaders: "Content-Type,Authorization", // Allowed headers
 }));
 app.use(cookieParser());
@@ -545,6 +545,25 @@ app.delete('/api/deleteUser/:username', async(req, res) => {
     res.json({message:"User succesfully deleted."});
   }catch (err){
     console.log("User not successfully deleted");
+    res.status(500).json({err});
+  }
+})
+
+//---Queries for updating the Database---
+app.patch('/api/toggleAdmin/:username', async(req, res) => {
+  console.log("Toggling Role")
+  try{
+    const user = await User.findOne({username: req.params.username});
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    user.role = user.role === "admin" ? "user" : "admin";
+    await user.save()
+
+    res.json({message:"Role successfully toggled.", user});
+  }catch(err){
+    console.log("Role not successfully toggled.");
     res.status(500).json({err});
   }
 })
