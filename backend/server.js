@@ -283,6 +283,17 @@ app.get('/api/allUsers', async (req, res) => {
   }
 });
 
+app.get('/api/allCarts', async (req, res) => {
+  try {
+    const carts = await Cart.find({});
+    res.send(carts);
+    console.log('All carts retrieved');
+  } catch (error) {
+      console.error("Error during aggregation:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
 //---Queries for posting to Database---
 
 /**
@@ -537,6 +548,24 @@ app.delete('/api/deleteUser/:username', async(req, res) => {
     console.log(req.params.username)
     const usernameToDel = req.params.username;
     const result = await User.deleteOne({username: usernameToDel});
+
+    if(result.deletedCount === 0){
+      return res.status(404).json({message: "User not found."});
+    }
+
+    res.json({message:"User succesfully deleted."});
+  }catch (err){
+    console.log("User not successfully deleted");
+    res.status(500).json({err});
+  }
+})
+
+app.delete('/api/deleteCart/:cartId', async(req, res) => {
+  console.log('Deleting Cart')
+  try{
+    console.log(req.params.cartId)
+    const cartToDel = req.params.cartId;
+    const result = await Cart.deleteOne({cartId: cartToDel});
 
     if(result.deletedCount === 0){
       return res.status(404).json({message: "User not found."});
