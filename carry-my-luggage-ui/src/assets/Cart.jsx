@@ -178,10 +178,11 @@ function Cart(){
                         top: "13%",
                         left: "70%",
                         maxHeight: "500px",
-                        overflowY: "scroll"
+                        overflowY: "scroll",
+                        overflowX:"hidden"
                         
                     }}
-                    className="grid p-5 grid-cols-1"
+                    className="grid p-5 grid-cols-1 w-[420px]"
                 >
                     {error ? (
                         <p>{error}</p>
