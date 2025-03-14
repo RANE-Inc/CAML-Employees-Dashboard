@@ -10,12 +10,13 @@ import {Card,
     CardTitle,} from "../components/ui/card";
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import OccupancyGridMap from './OccupancyGridMap'; // Import the map component
+
 function Cart(){
 
     const [cart, setCart] = useState([]);
     const [tasks, setTasks] = useState([]);
     const [error, setError] = useState(null);
-
     const { cartId } = useParams();
 
     console.log("Cart ID: ", cartId);
@@ -113,6 +114,7 @@ function Cart(){
                                     </CardContent>
                                 </Card>
                             </div>
+                            
                         ))
                     ) : (
                         <p>Loading tasks or no tasks available.</p>
