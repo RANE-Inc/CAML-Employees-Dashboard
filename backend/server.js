@@ -12,10 +12,10 @@ import cookieParser from 'cookie-parser';
 import swaggerUI from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
 
-// //imports for OccupanceGridMap
-// import http from 'http';
-// import { Server } from 'socket.io';
-// import ROSLIB from 'roslib';
+//imports for OccupanceGridMap
+import http from 'http';
+import { Server } from 'socket.io';
+import ROSLIB from 'roslib';
 
 
 const env = dotenv.config();
@@ -581,39 +581,48 @@ app.listen(PORT_2, () => {
 });
 
 
-// // OccupancyGridMap functions 
-// const server = http.createServer(app);
-// const io = new Server(server);
+//OccupancyGridMap functions 
+const server = http.createServer(app);
+const io = new Server(server);
 
-// // Temp stoarge in memeory 
-// let mapData = null; // Store OccupancyGrid data
+// Temp stoarge in memeory 
+let mapData = null; // Store OccupancyGrid data
 
-// // Connect to ROS
-// const ros = new ROSLIB.Ros({
-//   url: 'ws://localhost:9090' // using local host 9090 since we used that in ros_test.html
-// });
+// Connect to ROS
+const ros = new ROSLIB.Ros({
+  url: 'ws://localhost:9090' // using local host 9090 since we used that in ros_test.html
+});
 
-// // Subscribe to the /luggage_av/map topic where map data is stored
-// const chatter_topic = new ROSLIB.Topic({
-//   ros: ros,
-//   name: '/luggage_av/map',
-//   messageType: 'nav_msgs/OccupancyGrid'
-// });
+// To check ros connections
+ros.on('error', (error) => {
+  console.error('ROS connection error:', error);
+});
 
-// // This should also serve as a update function whenever OccupancyGrid message is received.
-// chatter_topic.subscribe((message) => {
-//   console.log('Received map data:', message);
-//   mapData = message; // Store the latest map data
+ros.on('close', () => {
+  console.log('ROS connection closed');
+});
 
-//   // Emit data to clients connected via WebSocket
-//   io.emit('mapData', message);
-// });
+// Subscribe to the /luggage_av/map topic where map data is stored
+const chatter_topic = new ROSLIB.Topic({
+  ros: ros,
+  name: '/luggage_av/map',
+  messageType: 'nav_msgs/msg/OccupancyGrid' // ROS 2 message format
+});
 
-// // API to retrieve stored map data
-// app.get('/api/map', (req, res) => {
-//   if (mapData) {
-//       res.json(mapData);
-//   } else {
-//       res.status(404).json({ error: 'No map data available' });
-//   }
-// });
+// This should also serve as a update function whenever OccupancyGrid message is received.
+chatter_topic.subscribe((message) => {
+  console.log('Received map data:', message);
+  mapData = message; // Store the latest map data
+
+  // Emit data to clients connected via WebSocket
+  io.emit('mapData', message);
+});
+
+// API to retrieve stored map data
+app.get('/api/map', (req, res) => {
+  if (mapData) {
+      res.json(mapData);
+  } else {
+      res.status(404).json({ error: 'No map data available' });
+  }
+});
