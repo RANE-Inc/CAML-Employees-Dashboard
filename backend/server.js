@@ -10,7 +10,9 @@ import { authMiddleware, adminMiddleware } from './middleware.js'
 import cookieParser from 'cookie-parser';
 
 import swaggerUI from 'swagger-ui-express';
-import swaggerJsDoc from 'swagger-jsdoc';
+import swaggerDocument from './swagger.json' assert {type: "json"}
+
+var swaggerOptions = {}
 
 //imports for OccupanceGridMap
 import http from 'http';
@@ -23,34 +25,11 @@ const env = dotenv.config();
 const PORT_2 = process.env.PORT_2 // port number
 const MONGODB_URL = process.env.MONGODB_URL // mongodb url
 
-// Swagger
-const swaggerAPIDescription = swaggerJsDoc({
-  swaggerDefinition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'CAML API',
-      version: '1.0.0',
-      description: 'API for CAML',
-      contact: {
-        name: 'CAML Team',
-        email: '  ',
-      },
-    },
-    servers: [
-      {
-        url: `http://localhost:${PORT_2}`,
-      },
-    ],
-  },
-  apis: ['server.js'],
-});
-
-
 
 const app = express();
 app.use(express.json());
 
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerAPIDescription));
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument, swaggerOptions));
 
 app.use(cors({
   origin: "http://localhost:5173", // Specify frontend URL
@@ -75,7 +54,7 @@ const cartSchema = new Schema({
   battery: Number,
   status: String,
   location: String,
-  timeRem: Number, 
+  timeRem: Number,
   cartId: String
 });
 
@@ -110,45 +89,17 @@ const Task = mongoose.model('tasks', taskSchema);
 const User = mongoose.model('users', UserSchema);
 
 //---Queries for getting from Database---
-//find all carts
+app.get('/api/airports', async (req, res) => {
+  try {
+    const allAirports = await Airport.find({});
+    res.send(allAirports);
+    console.log('Airports retrieved');
+  } catch (error) {
+      console.error("Error during aggregation:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
 
-/**
- * @swagger
- * /api/carts:
- *   get:
- *     summary: Retrieve carts based on airport code
- *     description: Fetch all carts associated with a specific airport by providing the airport code as a query parameter.
- *     parameters:
- *       - in: query
- *         name: airportCode
- *         schema:
- *           type: string
- *         required: true
- *         description: The airport code to filter carts by.
- *     responses:
- *       200:
- *         description: A list of carts retrieved successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                     description: The unique identifier for the cart.
- *                   airport:
- *                     type: string
- *                     description: The associated airport code.
- *                   otherFields:
- *                     type: string
- *                     description: Additional cart-related fields.
- *       400:
- *         description: Bad request, missing or invalid parameters.
- *       500:
- *         description: Internal Server Error.
- */
 app.get('/api/carts', async (req, res) => {
   try {
     console.log('Airport:', req.query.airportCode);
@@ -161,41 +112,6 @@ app.get('/api/carts', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/cart:
- *   get:
- *     summary: Retrieve a cart by cart ID
- *     description: Fetch a specific cart using its cart ID as a query parameter.
- *     parameters:
- *       - in: query
- *         name: cartId
- *         schema:
- *           type: string
- *         required: true
- *         description: The unique cart ID to retrieve.
- *     responses:
- *       200:
- *         description: Cart retrieved successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 _id:
- *                   type: string
- *                   description: The unique identifier for the cart.
- *                 cartId:
- *                   type: string
- *                   description: The cart's unique ID.
- *                 otherFields:
- *                   type: string
- *                   description: Additional cart-related fields.
- *       400:
- *         description: Bad request, missing or invalid parameters.
- *       500:
- *         description: Internal Server Error.
- */
 app.get('/api/cart', async (req, res) => {
   try {
     console.log('CartId:', req.query.cartId);
@@ -208,57 +124,15 @@ app.get('/api/cart', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/airports:
- *   get:
- *     summary: Retrieve all airports
- *     description: Fetch a list of all available airports.
- *     responses:
- *       200:
- *         description: A list of airports retrieved successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                     description: The unique identifier for the airport.
- *                   name:
- *                     type: string
- *                     description: The name of the airport.
- *                   code:
- *                     type: string
- *                     description: The IATA/ICAO airport code.
- *                   location:
- *                     type: string
- *                     description: The location of the airport.
- *       500:
- *         description: Internal Server Error.
- */
-app.get('/api/airports', async (req, res) => {
-  try {
-    const allAirports = await Airport.find({});
-    res.send(allAirports);
-    console.log('Airports retrieved');
-  } catch (error) {
-      console.error("Error during aggregation:", error);
-      res.status(500).send({ error: "Internal Server Error" });
-  }
-});
-
-app.get('/api/apikey', async (req, res) => {
-  apiKey = 123456;
-  if (req.query.apiKey == apiKey) {
-    res.send({message: "API Key is valid"});
-  }
-  else {
-    res.send({message: "API Key is invalid"});
-  }
-});
+// app.get('/api/apikey', async (req, res) => {
+//   apiKey = 123456;
+//   if (req.query.apiKey == apiKey) {
+//     res.send({message: "API Key is valid"});
+//   }
+//   else {
+//     res.send({message: "API Key is invalid"});
+//   }
+// });
 
 
 app.get('/api/taskFind', async (req, res) => {
@@ -297,85 +171,6 @@ app.get('/api/allCarts', async (req, res) => {
 });
 
 //---Queries for posting to Database---
-
-/**
- * @swagger
- * /api/tasks:
- *   post:
- *     summary: Create a new task
- *     description: Adds a new task to the database with the provided details.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - taskID
- *               - airport
- *               - airportLoc
- *               - startPoint
- *               - CartNum
- *               - taskTime
- *               - status
- *             properties:
- *               taskID:
- *                 type: string
- *                 description: Unique identifier for the task.
- *               airport:
- *                 type: string
- *                 description: The airport associated with the task.
- *               airportLoc:
- *                 type: string
- *                 description: The location within the airport.
- *               startPoint:
- *                 type: string
- *                 description: The starting point for the task.
- *               CartNum:
- *                 type: integer
- *                 description: The number of carts involved in the task.
- *               taskTime:
- *                 type: string
- *                 format: date-time
- *                 description: The timestamp for the task.
- *               status:
- *                 type: string
- *                 description: The status of the task (e.g., pending, completed).
- *     responses:
- *       201:
- *         description: Task created successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Task created successfully
- *                 task:
- *                   type: object
- *                   properties:
- *                     taskID:
- *                       type: string
- *                     airport:
- *                       type: string
- *                     airportLoc:
- *                       type: string
- *                     startPoint:
- *                       type: string
- *                     CartNum:
- *                       type: integer
- *                     taskTime:
- *                       type: string
- *                       format: date-time
- *                     status:
- *                       type: string
- *       400:
- *         description: Bad request, missing or invalid parameters.
- *       500:
- *         description: Internal Server Error.
- */
-
 app.post('/api/tasks', authMiddleware, adminMiddleware, async (req, res) => {
   console.log('Task:', req.body);
   try {
@@ -442,7 +237,7 @@ app.post('/api/createCart', authMiddleware, adminMiddleware, async (req,res) => 
 app.post('/register', async (req, res) => {
   try {
     const { username, password, role } = req.body;
-    
+
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashedPassword, role });
@@ -482,14 +277,14 @@ app.post('/login', async (req, res) => {
       // Generate Tokens
       console.log(user);
       const accessToken = jwt.sign(
-          { userId: user._id, role: user.role }, 
-          process.env.ACCESS_SECRET || "access_secret", 
+          { userId: user._id, role: user.role },
+          process.env.ACCESS_SECRET || "access_secret",
           { expiresIn: "15m" } // Short expiry
       );
 
       const refreshToken = jwt.sign(
-          { userId: user._id }, 
-          process.env.REFRESH_SECRET || "refresh_secret", 
+          { userId: user._id },
+          process.env.REFRESH_SECRET || "refresh_secret",
           { expiresIn: "7d" } // Longer expiry
       );
 
@@ -501,8 +296,8 @@ app.post('/login', async (req, res) => {
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
       res.cookie("accessToken", accessToken, {
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === "production", 
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
         sameSite: "Strict"
     });
 
@@ -571,7 +366,7 @@ app.get('/check-auth', (req, res) => {
       console.log("Decoded token:", decoded);  // Log the decoded token to check its contents
       req.user = decoded; // Store the decoded token in req.user
 
-      
+
       if (req.user.role !== 'admin') {
           return res.status(403).json({ message: 'Forbidden: Admins only' });
       }
@@ -628,7 +423,7 @@ app.patch('/api/toggleAdmin/:username', async(req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     user.role = user.role === "admin" ? "user" : "admin";
     await user.save()
 
