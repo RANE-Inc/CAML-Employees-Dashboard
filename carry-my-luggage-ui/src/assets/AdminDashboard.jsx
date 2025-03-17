@@ -156,7 +156,7 @@ function AdminDashboard() {
             {/*To be implemented*/}
             <div style={{position:"absolute", top: "55%", left:"52%"}}>
                 <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-amber-600">
-                    <Link style={{color:"white"}} >Create New Cart</Link>
+                    <Link style={{color:"white"}} to="/CreateCart" >Create New Cart</Link>
                 </Button>
             </div>
             

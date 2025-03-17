@@ -67,8 +67,6 @@ mongoose.connect(MONGODB_URL)
   .catch(err => console.error("MongoDB connection error:", err));
 
 
-
-
 // Define a schema
 const Schema = mongoose.Schema;
 const cartSchema = new Schema({
@@ -80,8 +78,6 @@ const cartSchema = new Schema({
   timeRem: Number, 
   cartId: String
 });
-
-
 
 const airportSchema = new Schema({
   location: String,
@@ -400,6 +396,46 @@ app.post('/api/tasks', authMiddleware, adminMiddleware, async (req, res) => {
   } catch (error) {
       console.error("Error posting to database: ", error);
       res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post('/api/createLocation', authMiddleware, adminMiddleware, async (req,res) => {
+  console.log('Location: ', req.body);
+  try{
+    const location = new Airport({
+      location: req.body.location,
+      airportCode: req.body.AP_Code,
+      numberOfCarts: 0
+    });
+
+    const savedLoc = await location.save()
+    console.log("Created Location: ", savedLoc);
+  }catch(error){
+    console.error("Error posting to database:", error);
+    res.status(500).json({error: "Internal Server Error"});
+  }
+});
+
+app.post('/api/createCart', authMiddleware, adminMiddleware, async (req,res) => {
+  console.log('Cart: ', req.body);
+  try{
+
+    const cartID = req.body.airport + req.body.cartNum;
+    const cart = new Cart({
+      cartNum: req.body.cartNum,
+      airport: req.body.airport,
+      battery: 100,
+      status: "Idle",
+      location: req.body.location,
+      timeRem: 0, 
+      cartId: cartID
+    });
+
+    const savedCart = await cart.save()
+    console.log("Created Location: ", savedCart);
+  }catch(error){
+    console.error("Error posting to database:", error);
+    res.status(500).json({error: "Internal Server Error"});
   }
 });
 
