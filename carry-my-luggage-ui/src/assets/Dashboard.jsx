@@ -44,9 +44,10 @@ function Dashboard() {
                     top: "9%",
                     left: "19%",
                     overflowY: "scroll",
+                    overflowX: "hidden",
                     maxHeight: "calc(100vh - 10%)",
                 }}
-                className="grid gap-12 p-4 sm:grid-cols-2 md:grid-cols-3"
+                className="grid gap-12 p-4 sm:grid-cols-2 md:grid-cols-3 w-[1200px]"
             >
                 {error ? (
                     <p>{error}</p>

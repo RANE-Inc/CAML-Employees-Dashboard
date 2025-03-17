@@ -10,7 +10,6 @@ import {Card,
     CardTitle,} from "../components/ui/card";
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import OccupancyGridMap from './OccupancyGridMap'; // Import the map component
 
 function Cart(){
 
@@ -57,7 +56,8 @@ function Cart(){
             <DropMyMenu/>
 
             <div className="flex gap-4">
-                <Card className="bg-amber-400" style={{fontFamily:'Kanit', position:"fixed", top:"15%", left:'30%'}}>
+                <CameraStream cartId={cartId}/>
+                <Card className="bg-amber-400" style={{fontFamily:'Kanit', position:"fixed", top:"15%", left:'50%'}}>
                     <CardTitle style={{paddingTop:'3%', fontSize:'225%'}}>
                         Cart {cart.cartNum}
                     </CardTitle>
@@ -65,7 +65,7 @@ function Cart(){
                         Airport: {cart.airport}
                     </CardContent>
                     <CardContent className='text-left' style={{fontSize:'150%'}}>
-                        Battery: {cart.battery}
+                        Battery: {cart.battery}%
                     </CardContent>
                     <CardContent className='text-left' style={{fontSize:'150%'}}>
                         Status: {cart.status} {cart.Location}
@@ -84,19 +84,21 @@ function Cart(){
                 <div
                     style={{
                         position: "fixed",
-                        top: "18%",
-                        left: "55%",
+                        top: "13%",
+                        left: "70%",
+                        maxHeight: "500px",
                         overflowY: "scroll",
-                        maxHeight: "calc(100vh - 10%)",
+                        overflowX:"hidden"
+                        
                     }}
-                    className="grid p-5 grid-cols-1"
+                    className="grid p-5 grid-cols-1 w-[420px]"
                 >
                     {error ? (
                         <p>{error}</p>
                     ) : tasks && tasks.length > 0 ? (
                         tasks.map((task) => (
-                            <div key={task.taskID} className="max-w-xs text-left">
-                                <Card className="bg-amber-400 h-[180px] w-[360px]">
+                            <div key={task.taskID} className="max-w-xs text-left" style={{paddingBottom:'3%'}}>
+                                <Card className="bg-amber-400 h-[180px] w-[360px]" >
                                     <CardTitle style={{ paddingLeft: "7%", paddingTop: "3%", fontSize: "160%" }}>
                                         Task {task.taskID}
                                     </CardTitle>
