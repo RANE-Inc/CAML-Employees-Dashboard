@@ -5,7 +5,7 @@ import { Button } from "../components/ui/button";
 
 function Home(){
     return(
-        <div style={{fontFamily:'Kanit', position:"fixed", top:"20%", left:'37%'}}>
+        <div style={{fontFamily:'Kanit', position:"absolute", top:"20%", left:'37%'}}>
             <div style={{fontSize:"250%", color:"SaddleBrown"}}>
                 Welcome To
             </div>

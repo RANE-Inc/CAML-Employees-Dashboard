@@ -48,7 +48,7 @@ function Signup() {
             <DropMyMenu />
 
 
-            <form className="grid grid-cols-1" style={{ paddingTop: "5%", fontFamily: "Kanit", position: "fixed", top: "18%", left: "44%" }} onSubmit={handleSubmit}>
+            <form className="grid grid-cols-1" style={{ paddingTop: "5%", fontFamily: "Kanit", position: "absolute", top: "18%", left: "44%" }} onSubmit={handleSubmit}>
                 <div style={{ paddingTop: "5%" }}>
                     <input
                         style={{ fontSize: "140%" }}

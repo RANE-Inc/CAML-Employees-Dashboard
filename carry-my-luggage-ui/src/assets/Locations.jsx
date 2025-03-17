@@ -35,7 +35,7 @@ function Locations(){
         <div>
             <DropMyMenu/>
 
-            <div style={{position:"fixed", top:"8%", left:"15%"}} className="grid gap-12 p-4 sm:grid-cols-3 md:grid-cols-4">
+            <div style={{position:"absolute", top:"8%", left:"15%"}} className="grid gap-12 p-4 sm:grid-cols-3 md:grid-cols-4">
                 {Airports.map((airport) =>
                     <div key={airport.airportCode} className='max-w-xs text-left'>
                         <Card className="bg-amber-400 h-[150px] w-[115%]">

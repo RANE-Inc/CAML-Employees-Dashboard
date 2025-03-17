@@ -34,13 +34,13 @@ function Dashboard() {
     return (
         <div>
             <DropMyMenu />
-            <b style={{ position: "fixed", color:"SaddleBrown", top: "2%", left: "45%", fontSize: '250%' }}>
+            <b style={{ position: "absolute", color:"SaddleBrown", top: "2%", left: "45%", fontSize: '250%' }}>
                 {airportCode} Airport
             </b>
 
             <div
                 style={{
-                    position: "fixed",
+                    position: "absolute",
                     top: "9%",
                     left: "19%",
                     overflowY: "scroll",

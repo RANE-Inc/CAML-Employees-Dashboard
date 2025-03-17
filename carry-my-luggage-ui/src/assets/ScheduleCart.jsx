@@ -81,7 +81,7 @@ function ScheduleCart() {
         <div>
             <DropMyMenu />
 
-            <div style={{ fontFamily: 'Kanit', position: "fixed", top: "20%", left: '42%' }}>
+            <div style={{ fontFamily: 'Kanit', position: "absolute", top: "20%", left: '42%' }}>
                 <div style={{ fontSize: "250%" }}>Schedule Cart {cart.cartNum}</div>
 
                 <form className="grid grid-cols-1" style={{ paddingTop: '5%' }} onSubmit={handleSubmit}>

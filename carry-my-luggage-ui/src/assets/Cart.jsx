@@ -10,6 +10,97 @@ import {Card,
     CardTitle,} from "../components/ui/card";
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import OccupancyGridMap from './OccupancyGridMap'; // Import the map component
+
+
+function CameraStream(props) {
+ 
+    // Using a modified example from
+    // https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs/-/tree/main/net/webrtc/gstwebrtc-api
+
+    // TODO: Spinner
+    // TODO: Fullscreen
+    // TODO: WebRTC client name based on current session (user_id? session_id?)
+
+    const signalingProtocol = window.location.protocol.startsWith("https") ? "wss" : "ws";
+    const gstWebRTCConfig = {
+        meta: { name: `WebClient-${Date.now()}` },
+        signalingServerUrl: `${signalingProtocol}://127.0.0.1:8443`,
+    };
+
+    const api = new GstWebRTCAPI(gstWebRTCConfig);
+
+    const streamListener = {
+        producerAdded: (producer) => {
+            if(producer.meta.name == null || producer.meta.name != props.cartId) return;
+
+            const parentElement = document.getElementById("camera-stream");
+            const videoElement = parentElement.getElementsByTagName("video")[0];
+
+            const session = api.createConsumerSession(producer.id);
+
+            if(session) {
+
+                parentElement._consumerSession = session;
+
+                session.addEventListener("error", (event) => {
+                    if(parentElement._consumerSession === session) {
+                        console.error(event.message, event.error);
+                    }
+                });
+
+                session.addEventListener("closed", () => {
+                    if(parentElement._consumerSession === session) {
+                        videoElement.pause();
+                        videoElement.srcObject = null;
+                        parentElement.classList.remove("streaming");
+                        delete parentElement._consumerSession;
+                    }
+                });
+
+                session.addEventListener("streamsChanged", () => {
+                    if(parentElement._consumerSession === session) {
+                        const streams = session.streams;
+                        if(streams.length > 0) {
+                            videoElement.srcObject = streams[0];
+                            videoElement.play().catch(() => {});
+                        }
+                    }
+                });
+
+                parentElement.classList.add("streaming");
+                session.connect();
+            }
+        },
+        producerRemoved: (producer) => {
+            if(producer.meta.name == null || producer.meta.name != props.cartId) return;
+
+            const parentElement = document.getElementById("camera-stream");
+
+            if(parentElement._consumerSession) {
+                parentElement._consumerSession.close();
+            }
+        }
+    };
+
+    useEffect(() => {
+        api.registerProducersListener(streamListener); // Register a listener in case a new producers get added/removed
+        for (const producer of api.getAvailableProducers()) { // Go through existing producers
+            streamListener.producerAdded(producer);
+        }
+    }, []);
+
+    // FIXME: Styling
+    // FIXME: Add CSS rule to set display: none on the spinner class when camera-stream has the class "streaming"
+    return(
+        <div id="camera-stream" style={{backgroundColor: "black", width: "600px", height: "450px", position:'absolute', bottom:'39%', right:'53%'}}>
+            <div id="spinner">
+                <span style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", color: "white"}}>Camera stream currently unavailable.</span>
+            </div>
+            <video muted={true} style={{width:"100%", height:"100%"}}></video>
+        </div>
+    );
+}
 
 function Cart(){
 
@@ -57,7 +148,7 @@ function Cart(){
 
             <div className="flex gap-4">
                 <CameraStream cartId={cartId}/>
-                <Card className="bg-amber-400" style={{fontFamily:'Kanit', position:"fixed", top:"15%", left:'50%'}}>
+                <Card className="bg-amber-400" style={{fontFamily:'Kanit', position:"absolute", top:"15%", left:'50%'}}>
                     <CardTitle style={{paddingTop:'3%', fontSize:'225%'}}>
                         Cart {cart.cartNum}
                     </CardTitle>
@@ -83,7 +174,7 @@ function Cart(){
                 </Card>
                 <div
                     style={{
-                        position: "fixed",
+                        position: "absolute",
                         top: "13%",
                         left: "70%",
                         maxHeight: "500px",

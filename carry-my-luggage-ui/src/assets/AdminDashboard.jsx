@@ -107,18 +107,18 @@ function AdminDashboard() {
     return (
         <div>
             <DropMyMenu />
-            <b style={{ position: "fixed", color:"SaddleBrown", top: "2%", left: "45%", fontSize: '250%' }}>
+            <b style={{ position: "absolute", color:"SaddleBrown", top: "2%", left: "45%", fontSize: '250%' }}>
                 Admin Dashboard
             </b>
-            <div style={{position:"fixed", top: "12%", left:"52%"}}>
+            <div style={{position:"absolute", top: "12%", left:"52%"}}>
                 <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-amber-600">
                     <Link style={{color:"white"}} to="/Signup">Create New User</Link>
                 </Button>
             </div>
-            <b style={{position:"fixed", color:"SaddleBrown", top: "12%", left:"20%", fontSize:"185%"}}>
+            <b style={{position:"absolute", color:"SaddleBrown", top: "12%", left:"20%", fontSize:"185%"}}>
                 All Users
             </b>
-            <div style={{position:"fixed", top: "20%", left:"19%", maxHeight: "250px", overflowY: "scroll" }}>
+            <div style={{position:"absolute", top: "20%", left:"19%", maxHeight: "250px", overflowY: "scroll" }}>
                 <Table className="w-[1000px]" style={{ fontSize:"175%"}}>
                     <TableHeader>
                         <TableRow>
@@ -149,11 +149,18 @@ function AdminDashboard() {
                 </Table>
             </div>
 
-            <b style={{position:"fixed", color:"SaddleBrown", top: "55%", left:"20%", fontSize:"185%"}}>
+            <b style={{position:"absolute", color:"SaddleBrown", top: "55%", left:"20%", fontSize:"185%"}}>
                 All Carts
             </b>
+
+            {/*To be implemented*/}
+            <div style={{position:"absolute", top: "55%", left:"52%"}}>
+                <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-amber-600">
+                    <Link style={{color:"white"}} >Create New Cart</Link>
+                </Button>
+            </div>
             
-            <div style={{position:"fixed", top: "60%", left:"19%", maxHeight: "250px", overflowY: "scroll"}}>
+            <div style={{position:"absolute", top: "60%", left:"19%", maxHeight: "250px", overflowY: "scroll"}}>
             <Table className="w-[1000px]" style={{fontSize:"175%"}}>
                 <TableHeader>
                     <TableRow>
