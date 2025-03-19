@@ -88,8 +88,8 @@ function OccupancyGridMap() {
     }, [mapData]);
 
     return (
-        <div>
-            <h2>Occupancy Grid Map</h2>
+        <div style={{position:'absolute', top:'60%', left: '73%'}}>
+            <h2>Map</h2>
             {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
             <canvas ref={canvasRef} style={{ border: '1px solid black' }}></canvas>
         </div>

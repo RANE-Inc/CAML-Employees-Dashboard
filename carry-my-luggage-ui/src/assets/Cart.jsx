@@ -93,7 +93,7 @@ function CameraStream(props) {
     // FIXME: Styling
     // FIXME: Add CSS rule to set display: none on the spinner class when camera-stream has the class "streaming"
     return(
-        <div id="camera-stream" style={{backgroundColor: "black", width: "600px", height: "450px", position:'absolute', bottom:'39%', right:'53%'}}>
+        <div id="camera-stream" style={{backgroundColor: "black", width: "600px", height: "450px", position:'absolute', bottom:'45%', left:'65%'}}>
             <div id="spinner">
                 <span style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", color: "white"}}>Camera stream currently unavailable.</span>
             </div>
@@ -146,9 +146,11 @@ function Cart(){
         <div>
             <DropMyMenu/>
 
+            <OccupancyGridMap/>
+
             <div className="flex gap-4">
                 <CameraStream cartId={cartId}/>
-                <Card className="bg-amber-400" style={{fontFamily:'Kanit', position:"absolute", top:"15%", left:'50%'}}>
+                <Card className="bg-amber-400" style={{fontFamily:'Kanit', position:"absolute", top:"25%", left:'16%'}}>
                     <CardTitle style={{paddingTop:'3%', fontSize:'225%'}}>
                         Cart {cart.cartNum}
                     </CardTitle>
@@ -175,8 +177,8 @@ function Cart(){
                 <div
                     style={{
                         position: "absolute",
-                        top: "13%",
-                        left: "70%",
+                        top: "25%",
+                        left: "38%",
                         maxHeight: "500px",
                         overflowY: "scroll",
                         overflowX:"hidden"
