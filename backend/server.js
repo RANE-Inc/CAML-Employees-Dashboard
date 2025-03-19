@@ -212,31 +212,26 @@ app.post('/api/createLocation', authMiddleware, adminMiddleware, async (req,res)
 });
 
 app.post('/api/createCart', authMiddleware, adminMiddleware, async (req,res) => {
-  console.log('Creating Cart at', req.body.airportCode);
+  console.log('Creating Cart at', req.body.airportCode, req.body.location);
   try{
 
     const allCarts = await Cart.find({airport: req.body.airportCode});
-    const nextCartNum = "1";
-    if(allCarts.length == 0){
-      console.log(nextCartNum);
-    }else{
-      nextCartNum = toString(parseInt(allCarts[-1].cartNum)+1);
-      console.log(nextCartNum);
-    }
+    const nextCartNum = (allCarts.length)+1;
 
-    const cartID = req.body.airportCode + nextCartNum;
-    // const cart = new Cart({
-    //   cartNum: nextCartNum
-    //   airport: req.body.airportCode,
-    //   battery: 100,
-    //   status: "Idle",
-    //   location: req.body.location,
-    //   timeRem: 0, 
-    //   cartId: cartID
-    // });
+    const cartID = (req.body.airportCode + nextCartNum);
+    
+    const cart = new Cart({
+      cartNum: nextCartNum,
+      airport: req.body.airportCode,
+      battery: 100,
+      status: "Idle",
+      location: req.body.location,
+      timeRem: 0, 
+      cartId: cartID
+    });
 
-    //const savedCart = await cart.save()
-    //console.log("Created Cart: ", savedCart);
+    const savedCart = await cart.save()
+    console.log("Created Cart: ", savedCart);
   }catch(error){
     console.error("Error posting to database:", error);
     res.status(500).json({error: "Internal Server Error"});

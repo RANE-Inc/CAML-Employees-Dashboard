@@ -11,7 +11,7 @@ function CreateCart(){
 
     const navigate = useNavigate();
     const [Airports, setAirports] = useState([]);
-    const [selectedLocation, setSelectedLocation] = useState('');
+    const [selectedLocation, setSelectedLocation] = useState('YOW');
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -45,23 +45,27 @@ function CreateCart(){
     }, []);
 
     const handleSubmit = async () => {
-        alert("To Be Implemented");
+        let AirportLocation = '';
+        for(let i = 0; i < Airports.length; i++){
+            if(Airports[i].airportCode == selectedLocation){
+                AirportLocation = Airports[i].location;
+            }
+        }
 
         try{
             const response = await api.post( // Use api instead of axios
                 '/api/createCart',
                 {
                     airportCode: selectedLocation,
-                    location: selectedLocation.location
+                    location: AirportLocation,
                 }
             );
             console.log("API Response: ", response.data);
-            alert("Successfully Created Cart")
-            navigate("/AdminDashboard")
+            alert("Successfully Created Cart");
         }catch (error){
             console.error("API Error:", error);
             setError("Failed to create cart.");
-            alert("Failed to create cart")
+            alert("Failed to create cart");
         }
     }
 
