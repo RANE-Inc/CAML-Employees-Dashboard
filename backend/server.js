@@ -10,7 +10,7 @@ import { authMiddleware, adminMiddleware } from './middleware.js'
 import cookieParser from 'cookie-parser';
 
 import swaggerUI from 'swagger-ui-express';
-import swaggerDocument from './swagger.json' assert {type: "json"}
+///import swaggerDocument from './swagger.json' assert {type: "json"}   was causing error
 
 var swaggerOptions = {}
 
@@ -29,7 +29,7 @@ const MONGODB_URL = process.env.MONGODB_URL // mongodb url
 const app = express();
 app.use(express.json());
 
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument, swaggerOptions));
+///app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument, swaggerOptions));  causing error
 
 app.use(cors({
   origin: "http://localhost:5173", // Specify frontend URL
@@ -212,22 +212,31 @@ app.post('/api/createLocation', authMiddleware, adminMiddleware, async (req,res)
 });
 
 app.post('/api/createCart', authMiddleware, adminMiddleware, async (req,res) => {
-  console.log('Cart: ', req.body);
+  console.log('Creating Cart at', req.body.airportCode);
   try{
 
-    const cartID = req.body.airport + req.body.cartNum;
-    const cart = new Cart({
-      cartNum: req.body.cartNum,
-      airport: req.body.airport,
-      battery: 100,
-      status: "Idle",
-      location: req.body.location,
-      timeRem: 0, 
-      cartId: cartID
-    });
+    const allCarts = await Cart.find({airport: req.body.airportCode});
+    const nextCartNum = "1";
+    if(allCarts.length == 0){
+      console.log(nextCartNum);
+    }else{
+      nextCartNum = toString(parseInt(allCarts[-1].cartNum)+1);
+      console.log(nextCartNum);
+    }
 
-    const savedCart = await cart.save()
-    console.log("Created Location: ", savedCart);
+    const cartID = req.body.airportCode + nextCartNum;
+    // const cart = new Cart({
+    //   cartNum: nextCartNum
+    //   airport: req.body.airportCode,
+    //   battery: 100,
+    //   status: "Idle",
+    //   location: req.body.location,
+    //   timeRem: 0, 
+    //   cartId: cartID
+    // });
+
+    //const savedCart = await cart.save()
+    //console.log("Created Cart: ", savedCart);
   }catch(error){
     console.error("Error posting to database:", error);
     res.status(500).json({error: "Internal Server Error"});

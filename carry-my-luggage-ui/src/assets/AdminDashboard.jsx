@@ -20,6 +20,7 @@ function AdminDashboard() {
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [carts, setCarts] = useState([]);
+    const [Airports, setAirports] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -65,6 +66,19 @@ function AdminDashboard() {
             });
     }, []);
 
+    useEffect(() => {
+        axios
+            .get('http://localhost:4000/api/airports')
+            .then((response) => {
+                console.log("API Response:", response.data); // Debug API data
+                setAirports(response.data);
+            })
+            .catch((error) => {
+                console.error("API Error:", error);
+                setError("Failed to fetch carts. Please try again later.");
+            });
+    }, []);
+
     const removeUser = async(username) => {
         axios
             .delete(`http://localhost:4000/api/deleteUser/${username}`)
@@ -84,6 +98,20 @@ function AdminDashboard() {
             .then((response) => {
                 console.log("API Response: ", response.data);
                 alert("Cart Succesfully deleted.");
+                window.location.reload();
+            }).catch((error) => {
+                console.error("API Error:",error);
+                alert("Error: " + error);
+        });
+    }
+
+    const removeAirport = async(code) => {
+        alert("To Be Implemented");
+        axios
+            .delete(`http://localhost:4000/api/deleteLocation/${code}`)
+            .then((response) => {
+                console.log("API Response: ", response.data);
+                alert("Location Succesfully deleted.");
                 window.location.reload();
             }).catch((error) => {
                 console.error("API Error:",error);
@@ -180,9 +208,6 @@ function AdminDashboard() {
                                         Create Task
                                     </Link>
                                 </Button>
-                                {/*<Button onClick={changePassword} style={{fontSize:'70%', color:"white"}} variant="secondary" className="bg-red-700">
-                                    Change Password
-                                </Button>*/}
                                 <Button onClick={() => removeCart(cart.cartId)} style={{fontSize:'70%', color:"white", transform:"translateX(5%)"}} variant="secondary" className="bg-red-700">
                                     Remove Cart
                                 </Button>
@@ -191,6 +216,47 @@ function AdminDashboard() {
                     )}
                 </TableBody>
             </Table>
+            </div>
+
+
+            <b style={{position:"absolute", color:"SaddleBrown", top: "97%", left:"20%", fontSize:"185%"}}>
+                All Locations
+            </b>
+
+            {/*To be implemented*/}
+            <div style={{position:"absolute", top: "97%", left:"52%"}}>
+                <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-amber-600">
+                    <Link style={{color:"white"}} to="/CreateLocation" >Create New Location</Link>
+                </Button>
+            </div>
+            
+            <div style={{position:"absolute", top: "102%", left:"19%", maxHeight: "250px", overflowY: "scroll", paddingBottom:'13%'}}>
+            <Table className="w-[1000px]" style={{fontSize:"175%"}}>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="w-[450px] text-left" style={{color:"Black", fontSize:"115%"}}>Location</TableHead>
+                        <TableHead className="w-[250px]" style={{color:"Black", fontSize:"115%"}}>Airport Code</TableHead>
+                        <TableHead style={{color:"Black", fontSize:"115%"}}>Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {Airports.map((airport) =>
+                        <TableRow >
+                            <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{airport.location}</TableCell>
+                            <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{airport.airportCode}</TableCell>
+                            <TableCell className="text-left">
+                                <Button onClick={() => removeAirport(airport.airportCode)} style={{fontSize:'70%', color:"white", transform:"translateX(1%)"}} variant="secondary" className="bg-red-700">
+                                    Remove Location
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+            </div>
+
+            <div>
+
             </div>
 
 

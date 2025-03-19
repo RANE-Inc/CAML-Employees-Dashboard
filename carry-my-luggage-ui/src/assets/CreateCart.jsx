@@ -10,6 +10,8 @@ import { useState, useEffect } from 'react';
 function CreateCart(){
 
     const navigate = useNavigate();
+    const [Airports, setAirports] = useState([]);
+    const [selectedLocation, setSelectedLocation] = useState('');
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -29,13 +31,72 @@ function CreateCart(){
         });
     }, [navigate]);
 
+    useEffect(() => {
+        axios
+            .get('http://localhost:4000/api/airports')
+            .then((response) => {
+                console.log("API Response:", response.data); // Debug API data
+                setAirports(response.data);
+            })
+            .catch((error) => {
+                console.error("API Error:", error);
+                setError("Failed to fetch carts. Please try again later.");
+            });
+    }, []);
+
+    const handleSubmit = async () => {
+        alert("To Be Implemented");
+
+        try{
+            const response = await api.post( // Use api instead of axios
+                '/api/createCart',
+                {
+                    airportCode: selectedLocation,
+                    location: selectedLocation.location
+                }
+            );
+            console.log("API Response: ", response.data);
+            alert("Successfully Created Cart")
+            navigate("/AdminDashboard")
+        }catch (error){
+            console.error("API Error:", error);
+            setError("Failed to create cart.");
+            alert("Failed to create cart")
+        }
+    }
+
     return(
         <div>
             <DropMyMenu />
-            <div style={{fontFamily:'Kanit', position:"absolute", top:"20%", left:'37%'}}>
+            <div style={{fontFamily:'Kanit', position:"absolute", top:"20%", left:'47%'}}>
                 <div style={{fontSize:"250%", color:"SaddleBrown"}}>
                     Create Cart
                 </div>
+
+                <form className="grid grid-cols-1" style={{ paddingTop: '5%' }} onSubmit={handleSubmit}>
+                    <div className="grid grid-4" style={{ fontSize: "150%", paddingTop: '5%' }}>
+
+                        {/* Select Location */}
+                        <label htmlFor='Location' style={{ paddingTop: '3%' }}>Select Location</label>
+                        <select
+                            id="Location"
+                            value={selectedLocation}
+                            onChange={(e) => setSelectedLocation(e.target.value)}
+                            className='bg-amber-200'
+                        >
+                            {Airports.map((loc) => (
+                                <option key={loc} value={loc.airportCode}>{loc.airportCode}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Confirm Button */}
+                    <div style={{ paddingTop: '8%' }}>
+                        <Button style={{ fontSize: '150%', color:"White" }} variant="secondary" className="bg-amber-600" type='submit'>
+                            Confirm
+                        </Button>
+                    </div>
+                </form>
             </div>
         </div>
     );
