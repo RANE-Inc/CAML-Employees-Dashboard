@@ -1,0 +1,437 @@
+# TODO: Document (verb) responses
+
+openapi: 3.1.1
+info:
+  title: CAML API
+  description: CAML Assisted Mobility Lift API
+  version: 0.0.1
+servers:
+- url: http://localhost:4000/
+  description: Localhost server
+
+
+
+paths:
+  "/api/auth/login":
+    post:
+      tags:
+        - "Auth"
+      summary: "Login to the system"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: User's username
+                password:
+                  type: string
+                  description: User's password
+      responses: {}
+  "/api/auth/refresh-token":
+    post:
+      tags:
+        - "Auth"
+      summary: "Refresh the current access token"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  description: Signed JWT refresh token
+      responses: {}
+  "/api/auth/logout":
+    post:
+      tags:
+        - "Auth"
+      summary: "Logs out user"
+      description: "Clears credential cookies, removing users access to the system"
+      responses: {}
+
+
+  "/api/airports":
+    get:
+      tags:
+        - Airports
+      summary: Retrieve a list of all Airports
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+          required: false
+      responses: {}
+  "/api/airport":
+    get:
+      tags:
+        - Airports
+      summary: Find an airport with a given airportCode.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: airportCode
+          description: Unique, identifiable code of an airport or terminal
+          schema:
+            type: string
+      responses: {}
+    post:
+      tags:
+      - Airports
+      summary: Create a new Airport entry.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - airportCode
+                - name
+              properties:
+                airportCode:
+                  type: string
+                  description: Unique, identifiable code of an airport or terminal.
+                name:
+                  type: string
+                  description: Name of the airport.
+      responses: {}
+    # TODO:
+    # delete:
+    #   tags:
+    #   - Airports
+    #   summary: remove an airport
+    #     responses: {}
+  "/api/airport/destinations":
+    get:
+      tags:
+        - Airports
+      summary: Find all the destinations in an airport with a given airportCode.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - name: airportCode
+          in: query
+          description: Unique, identifiable code of an airport or terminal
+          schema:
+            type: string
+      responses: {}
+
+
+  "/api/carts":
+    get:
+      tags:
+        - Carts
+      summary: Retrieve a list of carts
+      description: Fetch all carts or all carts associated with a specific airport by providing
+        the airport code as a query parameter.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: airportCode
+          description: Unique, identifiable code of an airport or a terminal.
+          schema:
+            type: string
+          required: false
+      responses: {}
+  "/api/cart":
+    get:
+      tags:
+        - Carts
+      summary: Retrieve metadata of a cart
+      description: Fetch a specific cart using its cart ID as a query parameter.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: cartId
+          description: The unique cart ID to retrieve.
+          schema:
+            type: string
+          required: true
+      responses: {}
+    post:
+      tags:
+        - Carts
+      summary: Create a new cart entry.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - airportCode
+                - name
+              properties:
+                airportCode:
+                  type: string
+                  description: Unique, identifiable code of an airport or a terminal.
+                name:
+                  type: string
+                  description: Name of the cart (usually in a form of a number).
+      responses: {}
+    # TODO: Remove all tasks as well
+    delete:
+      tags:
+        - Carts
+      summary: Remove a Cart from the system
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: cartId
+          description: ID of the cart.
+          schema:
+            type: string
+          required: true
+      responses: {}
+  "/api/cart/status":
+    get:
+      tags:
+        - Carts
+      summary: Returns the current status of the Cart.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: cartId
+          description: ID of the cart.
+          schema:
+            type: string
+          required: true
+      responses: {}
+  "/api/cart/map":
+    get:
+      tags:
+        - Carts
+      summary: Returns the map of the Cart.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: cartId
+          description: ID of the cart.
+          schema:
+            type: string
+          required: true
+      responses: {}
+  "/api/cart/tasks":
+    get:
+      tags:
+        - Carts
+      summary: Returns all the tasks or all the tasks of a cart.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: cartId
+          description: ID of the cart.
+          schema:
+            type: string
+          required: false
+      responses: {}
+  "/api/cart/task":
+    get:
+      tags:
+        - Carts
+      summary: Returns a task with a given taskId
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: taskId
+          description: ID of the task.
+          schema:
+            type: string
+          required: true
+      responses: {}
+    post:
+      tags:
+        - Carts
+      summary: Create a new task
+      description: Adds a new task to the database with the provided details.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - taskId
+                - cartId
+                - startPointId
+                - destinationId
+                - scheduledTime
+              properties:
+                taskId:
+                  type: string
+                  description: Unique identifier for the task.
+                cartId:
+                  type: string
+                  description: Unique identifier for the cart.
+                startPointId:
+                  type: string
+                  description: The unique identifier of a location within the airport, where a passanger is expected to be picked up.
+                destinationId:
+                  type: string
+                  description: The unique identifier of a location within the airport, where a passanger is expected to be dropped off.
+                scheduledTime:
+                  type: string
+                  format: date-time
+                  description: Timestamp of the beginning of the task.
+      responses: {}
+
+
+  "/api/users":
+    get:
+      tags:
+        - Users
+      summary: Retrieve a list of all users in the system.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: userRole
+          description: the role of the user. Currently one of either admin or user.
+          schema:
+            type: string
+          required: false
+      responses: {}
+
+  "/api/user":
+    get:
+      tags:
+        - Users
+      summary: Retrieves information about a user.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: username
+          description: Username of the user"
+          schema:
+            type: string
+          required: true
+      responses: {}
+    post:
+      tags:
+        - Users
+      summary: Create a user task
+      description: Adds a new user to the database with the provided username and password.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: User's username
+                password:
+                  type: string
+                  description: User's password
+      responses: {}
+  "/api/user/role":
+    patch:
+      tags:
+        - Users
+      summary: Change users role
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: username
+          description: User's username
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userRole
+              properties:
+                username:
+                  type: string
+                  description: User's role
+      responses: {}

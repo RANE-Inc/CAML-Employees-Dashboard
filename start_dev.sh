@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-export MONGODB_URL="mongodb://localhost:27017"
-export PORT_1=2000
-export PORT_2=4000
+# env variables moved to .env file
 
 parallel --line-buffer << RunDev
 mongod --dbpath ./backend/db                # MongoDB
