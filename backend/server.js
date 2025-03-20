@@ -48,7 +48,6 @@ const airportSchemas = {
   meta: new mongoose.Schema({
     airportCode: String,
     name: String,
-    numberOfCarts: Number // TODO: Needed or can be replace with counting entities in a set?
   }),
   destination: new mongoose.Schema({
     airportCode: String,
