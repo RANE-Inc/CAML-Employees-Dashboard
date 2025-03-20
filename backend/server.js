@@ -71,6 +71,9 @@ const taskSchema = new Schema({
   startPoint: String,
   CartNum: String,
   taskTime: String,
+  //2 new perameters for tablet
+  customer: String,
+  ticket: String,
   status: String    //Enum possibly
 })
 
@@ -181,7 +184,10 @@ app.post('/api/tasks', authMiddleware, adminMiddleware, async (req, res) => {
           startPoint: req.body.startPoint,
           CartNum: req.body.CartNum,
           taskTime: req.body.taskTime,
-          status: req.body.status
+          status: req.body.status,
+          customer: req.body.customer,
+          ticket: req.body.ticket
+
       });
 
       const savedTask = await task.save();

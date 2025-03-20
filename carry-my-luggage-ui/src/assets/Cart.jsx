@@ -191,17 +191,23 @@ function Cart(){
                     ) : tasks && tasks.length > 0 ? (
                         tasks.map((task) => (
                             <div key={task.taskID} className="max-w-xs text-left" style={{paddingBottom:'3%'}}>
-                                <Card className="bg-amber-400 h-[180px] w-[360px]" >
+                                <Card className="bg-amber-400 h-[240px] w-[360px]" >
                                     <CardTitle style={{ paddingLeft: "7%", paddingTop: "3%", fontSize: "160%" }}>
                                         Task {task.taskID}
                                     </CardTitle>
-                                    <CardContent style={{ paddingTop:'3%', paddingBottom: "2%", fontSize: "110%" }}>
+                                    <CardContent style={{ paddingTop:'3%', paddingBottom: "1%", fontSize: "110%" }}>
+                                        Customer Name: {task.customer}
+                                    </CardContent>
+                                    <CardContent style={{ paddingBottom: "1%", fontSize: "110%" }}>
+                                        Ticket Number: {task.ticket}
+                                    </CardContent>
+                                    <CardContent style={{ paddingBottom: "1%", fontSize: "110%" }}>
                                         Task Start Time: {task.taskTime}
                                     </CardContent>
                                     <CardContent style={{ paddingBottom: "1%", fontSize: "110%" }}>
                                         Start Location: {task.startPoint}
                                     </CardContent>
-                                    <CardContent style={{ paddingBottom: "2%", fontSize: "110%" }}>
+                                    <CardContent style={{ paddingBottom: "1%", fontSize: "110%" }}>
                                         Destination: {task.airportLoc}
                                     </CardContent>
                                     <CardContent style={{ paddingBottom: "2%", fontSize: "110%" }}>

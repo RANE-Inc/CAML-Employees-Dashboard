@@ -14,6 +14,8 @@ function ScheduleCart() {
     const [cart, setCart] = useState({});
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [username, setUsername] = useState('');
+    const [ticketNumber, setTicketNumber] = useState('');
 
     // Check authentication on component mount
     useEffect(() => {
@@ -59,6 +61,8 @@ function ScheduleCart() {
                     taskID: cartId, 
                     airport: cart.airport,
                     CartNum: cart.cartNum,
+                    customer: username,
+                    ticket: ticketNumber,
                     startPoint: selectedStart || "Gate A",
                     airportLoc: selectedDestination || "Gate A",
                     taskTime: selectedTime && selectedAMPM ? `${selectedTime} ${selectedAMPM}` : "1:00 PM",
@@ -86,6 +90,28 @@ function ScheduleCart() {
 
                 <form className="grid grid-cols-1" style={{ paddingTop: '5%' }} onSubmit={handleSubmit}>
                     <div className="grid grid-4" style={{ fontSize: "150%", paddingTop: '5%' }}>
+                        {/* Username Input */}
+                        <label htmlFor='username'>Username</label>
+                        <input
+                            id="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="bg-amber-200 p-2"
+                            type="text"
+                            placeholder="Enter Username"
+                        />
+
+                        {/* Ticket Number Input */}
+                        <label htmlFor='ticketNumber' style={{ paddingTop: '3%' }}>Ticket Number</label>
+                        <input
+                            id="ticketNumber"
+                            value={ticketNumber}
+                            onChange={(e) => setTicketNumber(e.target.value)}
+                            className="bg-amber-200 p-2"
+                            type="text"
+                            placeholder="Enter Ticket Number"
+                        />
+
                         {/* Select Time */}
                         <label htmlFor='time'>Select Time</label>
                         <select
