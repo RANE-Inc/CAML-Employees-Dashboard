@@ -218,18 +218,17 @@ function AdminDashboard() {
             </div>
 
 
-            <b style={{position:"absolute", color:"SaddleBrown", top: "96%", left:"20%", fontSize:"185%"}}>
+            <b style={{position:"absolute", color:"SaddleBrown", top: "93%", left:"20%", fontSize:"185%"}}>
                 All Locations
             </b>
 
-            {/*To be implemented*/}
-            <div style={{position:"absolute", top: "96%", left:"52%"}}>
+            <div style={{position:"absolute", top: "93%", left:"52%"}}>
                 <Button style={{fontSize:'150%'}} variant="secondary"  className="bg-amber-600">
                     <Link style={{color:"white"}} to="/CreateLocation" >Create New Location</Link>
                 </Button>
             </div>
             
-            <div style={{position:"absolute", top: "101%", left:"19%", maxHeight: "250px", overflowY: "scroll"}}>
+            <div style={{position:"absolute", top: "98%", left:"19%", maxHeight: "250px", overflowY: "scroll"}}>
             <Table className="w-[1000px]" style={{fontSize:"175%"}}>
                 <TableHeader>
                     <TableRow>
@@ -254,7 +253,7 @@ function AdminDashboard() {
             </Table>
             </div>
 
-            <b style={{ position: "absolute", color:"#fffbeb", top: "130%", left: "45%", fontSize: '250%' }}>
+            <b style={{ position: "absolute", color:"#fffbeb", top: "125%", left: "45%", fontSize: '250%' }}>
                 /
             </b>
 

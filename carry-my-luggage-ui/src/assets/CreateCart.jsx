@@ -72,7 +72,7 @@ function CreateCart(){
     return(
         <div>
             <DropMyMenu />
-            <div style={{fontFamily:'Kanit', position:"absolute", top:"20%", left:'47%'}}>
+            <div style={{fontFamily:'Kanit', position:"absolute", top:"20%", left:'45%'}}>
                 <div style={{fontSize:"250%", color:"SaddleBrown"}}>
                     Create Cart
                 </div>
