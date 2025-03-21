@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import cors from 'cors';
 
 export const authMiddleware = (req, res, next) => {
     const token = req.cookies.accessToken; // Read from cookies
@@ -21,3 +22,13 @@ export const adminMiddleware = (req, res, next) => {
     }
     next();
 };
+
+//middleware for tabletLogin
+const corsTablet = cors({
+    origin: "http://localhost:3000", // Frontend (Electron app) URL
+    credentials: true, // Allow cookies or authorization headers
+    methods: "GET, POST", // Allow both GET and POST requests
+    allowedHeaders: "Content-Type,Authorization", // Allow necessary headers
+  });
+
+  export default corsTablet;

@@ -8,6 +8,8 @@ import jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 import { authMiddleware, adminMiddleware } from './middleware.js'
 import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import corsTablet from './middleware.js'; // Adjust path as necessary
 
 import swaggerUI from 'swagger-ui-express';
 ///import swaggerDocument from './swagger.json' assert {type: "json"}   was causing error
@@ -444,55 +446,86 @@ app.patch('/api/toggleAdmin/:username', async(req, res) => {
   }
 })
 
+
+
+// //OccupancyGridMap functions 
+// const server = http.createServer(app);
+// const io = new Server(server);
+
+// // Temp stoarge in memeory 
+// let mapData = null; // Store OccupancyGrid data
+
+// // Connect to ROS
+// const ros = new ROSLIB.Ros({
+//   url: 'ws://localhost:9090' // using local host 9090 since we used that in ros_test.html
+// });
+
+// // To check ros connections
+// ros.on('error', (error) => {
+//   console.error('ROS connection error:', error);
+// });
+
+// ros.on('close', () => {
+//   console.log('ROS connection closed');
+// });
+
+// // Subscribe to the /luggage_av/map topic where map data is stored
+// const chatter_topic = new ROSLIB.Topic({
+//   ros: ros,
+//   name: '/luggage_av/map',
+//   messageType: 'nav_msgs/msg/OccupancyGrid' // ROS 2 message format
+// });
+
+// // This should also serve as a update function whenever OccupancyGrid message is received.
+// chatter_topic.subscribe((message) => {
+//   console.log('Received map data:', message);
+//   mapData = message; // Store the latest map data
+
+//   // Emit data to clients connected via WebSocket
+//   io.emit('mapData', message);
+// });
+
+// // API to retrieve stored map data
+// app.get('/api/map', (req, res) => {
+//   if (mapData) {
+//       res.json(mapData);
+//   } else {
+//       res.status(404).json({ error: 'No map data available' });
+//   }
+// });
+
+//other stuff for tablet login
+app.use(bodyParser.json()); // Parse incoming JSON request bodies
+app.use(corsTablet); // Allow CORS for all routes, or you can apply it specifically to certain routes like '/tabletLogin'
+
+// Root route
+app.get('/', (req, res) => {
+  res.send('Welcome to the API! Please use the /login endpoint.');
+});
+
+// fetches list of customers and tickets
+const tasksticket = await Task.find({}, "ticket");
+const tickets = tasksticket.map(task => task.ticket);
+
+const taskscustomer = await Task.find({}, "customer");
+const customers = taskscustomer.map(task => task.customer);
+
+//tabletLogin endpoint
+app.post('/tabletLogin', corsTablet, (req, res) => {
+  const { name, ticket } = req.body;
+  // Check if name exists in customers and ticket exists in tickets
+  const isValidCustomer = customers.includes(name);
+  const isValidTicket = tickets.includes(ticket);
+  
+  if (isValidCustomer && isValidTicket) {
+    res.status(200).json({ success: true, message: 'Authentication successful!' });
+  } else {
+    res.status(401).json({ success: false, message: 'Invalid name or ticket' });
+  }
+});
+
 //set up the server
 
 app.listen(PORT_2, () => {
   console.log('Server started on http://localhost:' + PORT_2);
-});
-
-
-//OccupancyGridMap functions 
-const server = http.createServer(app);
-const io = new Server(server);
-
-// Temp stoarge in memeory 
-let mapData = null; // Store OccupancyGrid data
-
-// Connect to ROS
-const ros = new ROSLIB.Ros({
-  url: 'ws://localhost:9090' // using local host 9090 since we used that in ros_test.html
-});
-
-// To check ros connections
-ros.on('error', (error) => {
-  console.error('ROS connection error:', error);
-});
-
-ros.on('close', () => {
-  console.log('ROS connection closed');
-});
-
-// Subscribe to the /luggage_av/map topic where map data is stored
-const chatter_topic = new ROSLIB.Topic({
-  ros: ros,
-  name: '/luggage_av/map',
-  messageType: 'nav_msgs/msg/OccupancyGrid' // ROS 2 message format
-});
-
-// This should also serve as a update function whenever OccupancyGrid message is received.
-chatter_topic.subscribe((message) => {
-  console.log('Received map data:', message);
-  mapData = message; // Store the latest map data
-
-  // Emit data to clients connected via WebSocket
-  io.emit('mapData', message);
-});
-
-// API to retrieve stored map data
-app.get('/api/map', (req, res) => {
-  if (mapData) {
-      res.json(mapData);
-  } else {
-      res.status(404).json({ error: 'No map data available' });
-  }
 });
