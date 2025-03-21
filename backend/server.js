@@ -262,6 +262,13 @@ app.post('/api/auth/refresh-token', (req, res) => {
           { expiresIn: "15m" }
       );
 
+      // Update the cookie
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: false, // TODO: Check if SSL is enabled instead
+        sameSite: "Strict"
+      });
+
       return res.status(200).json({ accessToken });
 
   } catch (error) {
