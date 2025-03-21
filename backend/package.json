@@ -1,5 +1,5 @@
 {
-  "name": "carrymyluggage-ui-test-ryan",
+  "name": "caml-backend",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -27,8 +27,8 @@
     "swagger-ui-express": "^5.0.1",
     "yaml": "^2.7.0"
   },
-  "description": "CarryMyLuggage Website",
-  "main": "eslint.config.js",
+  "description": "CAML Backend",
+  "main": "server.js",
   "author": "",
   "license": "ISC"
 }
