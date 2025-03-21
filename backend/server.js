@@ -384,9 +384,9 @@ app.delete('/api/airport', authMiddleware, adminMiddleware, queryStringsMiddlewa
   }
 })
 
-app.get('/api/airport/destinations', apiKeyMiddleware, authMiddleware, queryStringsMiddleware(["airportCode"]), async (req, res) => {
+app.get('/api/airport/destinations', apiKeyMiddleware, authMiddleware, async (req, res) => {
   try {
-    const airportDestinations = await Airport.Destination.find({airportCode: req.query.airportCode});
+    const airportDestinations = await Airport.Destination.find(req.query.airportCode ? {airportCode: req.query.airportCode} : {});
     res.send(airportDestinations);
     // console.log('Airports retrieved');
   } catch (error) {
