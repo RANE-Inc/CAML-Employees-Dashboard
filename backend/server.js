@@ -48,6 +48,7 @@ const airportSchemas = {
   meta: new mongoose.Schema({
     airportCode: String,
     name: String,
+    location: String,
   }),
   destination: new mongoose.Schema({
     airportCode: String,
@@ -70,11 +71,13 @@ const cartSchemas = {
     battery: Number,
     status: {type: String, enum: ["Offline"]}, // TODO: More states
     position: [Number],
-    destination: [Number]
+    destinationId: String
   }),
   task: new mongoose.Schema({
     taskId: String,
     cartId: String,
+    customerName: String,
+    ticketNumber: String,
     startPointId: String,
     destinationId: String,
     scheduledTime: Date,
@@ -201,12 +204,13 @@ app.post('/api/auth/login', requestBodyMiddleware(["username", "password"]), asy
           secure: false, // TODO: Check if SSL is enabled instead
           sameSite: "Lax",
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+          path: "/api/auth/refresh-token"
       });
       res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: false, // TODO: Check if SSL is enabled instead
         sameSite: "Strict"
-    });
+      });
 
       return res.status(200).json({ accessToken });
 
@@ -248,6 +252,18 @@ app.post('/api/auth/logout', (req, res) => {
   return res.status(200).json({ message: "Logged out successfully" });
 });
 
+app.get("/api/auth/check-auth", authMiddleware, (req, res) => {
+  // Dummy endpoint to check if user is authenticated
+
+  return res.status(200).json({ message: "user authenticated" })
+});
+
+app.get("/api/auth/check-admin", authMiddleware, adminMiddleware, (req, res) => {
+  // Dummy endpoint to check if user is admin
+
+  return res.status(200).json({ message: "admin permissions available" })
+});
+
 ////// Airports
 app.get('/api/airports', authMiddleware, async (req, res) => {
   try {
@@ -276,19 +292,17 @@ app.get('/api/airport', authMiddleware, queryStringsMiddleware(["airportCode"]),
   }
 });
 
-app.post('/api/airport', authMiddleware, adminMiddleware, requestBodyMiddleware(["airportCode", "name"]), async (req,res) => {
+app.post('/api/airport', authMiddleware, adminMiddleware, requestBodyMiddleware(["airportCode", "name", "location"]), async (req,res) => {
   // console.log('Location: ', req.body);
   try{
-
-    const airport = await Airport.Meta.findOne({airportCode: req.body.airportCode}).exec();
-
-    if(!airport) {
+    if(await Airport.Meta.findOne({airportCode: req.body.airportCode}).exec()) {
       return res.status(409).json({ message: "Airport already exists!" })
     }
 
     await Airport.Meta.create({
       airportCode: req.body.airportCode,
-      name: req.body.name
+      name: req.body.name,
+      location: req.body.location
     });
 
     // console.log("Created Location: ", savedLoc);
@@ -342,12 +356,12 @@ app.get('/api/cart', authMiddleware, queryStringsMiddleware(["cartId"]), async (
   }
 });
 
-app.post('/api/cart', authMiddleware, adminMiddleware, requestBodyMiddleware(["aiportCode", "name"]), async (req,res) => {
+app.post('/api/cart', authMiddleware, adminMiddleware, requestBodyMiddleware(["airportCode", "name"]), async (req,res) => {
   // console.log('Cart: ', req.body);
   try{
     const cartId = req.body.airportCode + req.body.name;
 
-    if(!(await Cart.Meta.exists({cartId: cartId}).exec())) return res.status(400).send("Cart already exists.");
+    if(await Cart.Meta.exists({cartId: cartId}).exec()) return res.status(400).send("Cart already exists.");
 
     Cart.Meta.create({
       cartId: cartId,
@@ -360,13 +374,14 @@ app.post('/api/cart', authMiddleware, adminMiddleware, requestBodyMiddleware(["a
       battery: -1,
       status: "Offline",
       position: [null,null],
-      destination: [null,null]
+      destinationId: null
     });
 
     // console.log("Created Location: ", savedCart);
+    return res.status(201).json({ message: "Cart created successfully." })
   }catch(error){
     console.error("Error during '/api/cart' POST request:", error);
-    res.status(500).json({error: "Internal Server Error"});
+    return res.status(500).json({error: "Internal Server Error"});
   }
 });
 
@@ -418,7 +433,7 @@ app.get('/api/cart/map', authMiddleware, queryStringsMiddleware(["cartId"]), (re
 app.get('/api/cart/tasks', authMiddleware, async (req, res) => { // TODO: Swagger
   try {
     // console.log('Searching for task with CartId:', req.query.cartId);
-    const cartTasks = await Cart.Task.find(req.query.cartId ? {cardId: req.query.cartId} : {}).exec();
+    const cartTasks = await Cart.Task.find(req.query.cartId ? {cartId: req.query.cartId} : {}).exec();
     // console.log(cartTasks)
     res.send(cartTasks);
     // console.log('Tasks retrieved');
@@ -445,12 +460,14 @@ app.get('/api/cart/task', authMiddleware, queryStringsMiddleware(["taskId"]), as
   }
 });
 
-app.post('/api/cart/task', authMiddleware, requestBodyMiddleware(["taskId", "cartId", "statusPointId", "destinationId", "scheduledTime"]), async (req, res) => {
+app.post('/api/cart/task', authMiddleware, requestBodyMiddleware(["taskId", "cartId", "customerName", "ticketNumber", "startPointId", "destinationId", "scheduledTime"]), async (req, res) => {
   // console.log('Task:', req.body);
   try {
       await Cart.Task.create({
         taskId: req.body.taskId,
         cartId: req.body.cartId,
+        customerName: req.body.customerName,
+        ticketNumber: req.body.ticketNumber,
         startPointId: req.body.startPointId,
         destinationId: req.body.destinationId,
         scheduledTime: new Date(req.body.scheduledTime),
@@ -459,7 +476,7 @@ app.post('/api/cart/task', authMiddleware, requestBodyMiddleware(["taskId", "car
 
       // console.log("Created Task: ", savedTask);
 
-      res.status(201).json({ message: "Task created successfully", task: savedTask });
+      res.status(201).json({ message: "Task created successfully" });
   } catch (error) {
       console.error("Error during /api/cart/task POST request", error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -471,7 +488,7 @@ app.post('/api/cart/task', authMiddleware, requestBodyMiddleware(["taskId", "car
 ////// Users
 app.get('/api/users', authMiddleware, adminMiddleware, async (req, res) => { // TODO: Swagger
   try {
-    const users = await User.find(req.query.userRole ? {role: req.query.userRole} : {}).exec();
+    const users = await User.find(req.query.role ? {role: req.query.role} : {}).exec();
     res.send(users);
     // console.log('Users retrieved');
   } catch (error) {
@@ -528,7 +545,7 @@ app.delete('/api/user/', authMiddleware, adminMiddleware, queryStringsMiddleware
   }
 })
 
-app.patch('/api/user/role', authMiddleware, adminMiddleware, queryStringsMiddleware(["username"]), requestBodyMiddleware(["userRole"]), async(req, res) => {
+app.patch('/api/user/role', authMiddleware, adminMiddleware, queryStringsMiddleware(["username"]), requestBodyMiddleware(["role"]), async(req, res) => {
   console.log("Updating Role")
   try{
     const user = await User.findOne({username: req.query.username}).exec();
@@ -536,7 +553,7 @@ app.patch('/api/user/role', authMiddleware, adminMiddleware, queryStringsMiddlew
       return res.status(404).json({ message: "User not found" });
     }
 
-    user.updateOne({role: req.body.userRole}).exec();
+    user.updateOne({role: req.body.role}).exec();
 
     res.json({message:"Role successfully toggled.", user});
   }catch(err){

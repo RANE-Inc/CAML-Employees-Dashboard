@@ -11,6 +11,10 @@ import DropMyMenu from '../components/ui/dropMyMenu';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 
+// TODO: To display some details about carts in a location, such as the statuses of carts, move the card
+//       from the Locations component into it's own component. That new component can call /api/carts with
+//       its airportCode.
+
 function Dashboard() {
     const [luggageCarts, setLuggageCarts] = useState([]);
     const [error, setError] = useState(null);
@@ -21,7 +25,7 @@ function Dashboard() {
     console.log("Airport Code:", airportCode); // Debug airport code
       useEffect(() => {
         axios
-            .get('http://localhost:4000/api/carts', {params: {airportCode: airportCode || {}}})
+            .get('http://localhost:4000/api/carts', {params: {airportCode: airportCode}, withCredentials: true })
             .then((response) => {
                 setLuggageCarts(response.data);
             })
@@ -56,15 +60,12 @@ function Dashboard() {
                         <div key={cart.cartId} className="max-w-xs text-left">
                             <Card className="bg-amber-400 h-[160px] w-[360px]">
                                 <CardTitle style={{ paddingLeft: "7%", paddingTop: "3%", fontSize: "160%" }}>
-                                    Cart {cart.cartNum}
+                                    Cart {cart.name}
                                 </CardTitle>
                                 <CardContent style={{ paddingTop: "3%", paddingBottom: "1%", fontSize: "110%" }}>
-                                    Battery: {cart.battery}%
+                                    Cart ID: {cart.cartId}
                                 </CardContent>
-                                <CardContent style={{ paddingBottom: "2%", fontSize: "110%" }}>
-                                    Status: {cart.status} {cart.location == "Charging" || cart.location} ({cart.timeRem || 0} Minutes)
-                                </CardContent>
-                                <div style={{ paddingLeft: '6%' }}>
+                                <div style={{ paddingLeft: '6%', marginTop: '8%' }}>
                                     <Button
                                         style={{ fontSize: '100%' }}
                                         variant="secondary"

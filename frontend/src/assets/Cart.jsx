@@ -104,16 +104,17 @@ function CameraStream(props) {
 
 function Cart(){
 
-    const [cart, setCart] = useState([]);
+    const [cart, setCart] = useState({});
+    const [cartStatus, setCartStatus] = useState({});
     const [tasks, setTasks] = useState([]);
     const [error, setError] = useState(null);
     const { cartId } = useParams();
 
-    console.log("Cart ID: ", cartId);
+    // console.log("Cart ID: ", cartId);
 
-      useEffect(() => {
+    useEffect(() => {
         axios
-            .get('http://localhost:4000/api/cart', {params: {cartId: cartId}|| {}})
+            .get('http://localhost:4000/api/cart', {params: {cartId: cartId}, withCredentials: true })
             .then((response) => {
                 console.log("API Response:", response.data); // Debug API data
                 setCart(response.data);
@@ -124,21 +125,32 @@ function Cart(){
             });
     }, []);
 
-    console.log("Cart ID: ", cartId);
-
-        useEffect(() => {
-            axios
-                .get('http://localhost:4000/api/taskFind', {params: {cartId: cartId}|| {}})
-                .then((response) => {
-                    console.log("API Response:", response.data); // Debug API data
-                    setTasks(response.data);
-                })
-                .catch((error) => {
-                    console.error("API Error:", error);
-                    setError("Failed to fetch tasks. Please try again later.");
-                });
+    useEffect(() => {
+    axios
+        .get('http://localhost:4000/api/cart/status', {params: {cartId: cartId}, withCredentials: true })
+        .then((response) => {
+            console.log("API Response:", response.data); // Debug API data
+            setCartStatus(response.data);
+        })
+        .catch((error) => {
+            console.error("API Error:", error);
+            setError("Failed to fetch cart's status. Please try again later.");
+        });
     }, []);
-    
+
+    useEffect(() => {
+        axios
+            .get('http://localhost:4000/api/cart/tasks', {params: {cartId: cartId}, withCredentials: true })
+            .then((response) => {
+                console.log("API Response:", response.data); // Debug API data
+                setTasks(response.data);
+            })
+            .catch((error) => {
+                console.error("API Error:", error);
+                setError("Failed to fetch tasks. Please try again later.");
+            });
+    }, []);
+
     // const cart = {cartNum:'1' ,airport:'YOW', battery: 50, status:'Moving To', Location:'Gate 1', timeRem:30};
 
     return(
@@ -152,24 +164,24 @@ function Cart(){
                 <CameraStream cartId={cartId}/>
                 <Card className="bg-amber-400" style={{fontFamily:'Kanit', position:"absolute", top:"25%", left:'16%'}}>
                     <CardTitle style={{paddingTop:'3%', fontSize:'225%'}}>
-                        Cart {cart.cartNum}
+                        Cart { cart.name }
                     </CardTitle>
                     <CardContent className='text-left' style={{paddingTop:'8%', fontSize:'150%'}}>
-                        Airport: {cart.airport}
+                        Cart ID: { cartId }
                     </CardContent>
                     <CardContent className='text-left' style={{fontSize:'150%'}}>
-                        Battery: {cart.battery}%
+                        Battery: {cartStatus.battery}%
                     </CardContent>
                     <CardContent className='text-left' style={{fontSize:'150%'}}>
-                        Status: {cart.status} {cart.Location}
+                        Status: {cartStatus.status}
                     </CardContent>
                     <CardContent className='text-left' style={{fontSize:'150%'}}>
-                        Time Remaining: {cart.timeRem} Minutes
+                        Destination: { cartStatus.destination }
                     </CardContent>
                     <div style={{paddingTop:'10%', paddingBottom:'5%'}}>
                         <Button style={{fontSize:'150%', color:"white"}} variant="secondary"  className="bg-amber-600">
-                            <Link style={{color:"white"}} to={`/ScheduleCart/${cart.cartId}`}>
-                                Schedule Cart {cart.cartNum}
+                            <Link style={{color:"white"}} to={`/ScheduleCart/${cartId}`}>
+                                Schedule Cart {cartStatus.cartNum}
                             </Link>
                         </Button>
                     </div>
@@ -182,7 +194,6 @@ function Cart(){
                         maxHeight: "500px",
                         overflowY: "scroll",
                         overflowX:"hidden"
-                        
                     }}
                     className="grid p-5 grid-cols-1 w-[420px]"
                 >
@@ -191,31 +202,30 @@ function Cart(){
                     ) : tasks && tasks.length > 0 ? (
                         tasks.map((task) => (
                             <div key={task.taskID} className="max-w-xs text-left" style={{paddingBottom:'3%'}}>
-                                <Card className="bg-amber-400 h-[240px] w-[360px]" >
+                                <Card className="bg-amber-400 h-[280xpx] w-[360px]" >
                                     <CardTitle style={{ paddingLeft: "7%", paddingTop: "3%", fontSize: "160%" }}>
-                                        Task {task.taskID}
+                                        Task {task.taskId}
                                     </CardTitle>
                                     <CardContent style={{ paddingTop:'3%', paddingBottom: "1%", fontSize: "110%" }}>
-                                        Customer Name: {task.customer}
+                                        Customer Name: {task.customerName}
                                     </CardContent>
                                     <CardContent style={{ paddingBottom: "1%", fontSize: "110%" }}>
-                                        Ticket Number: {task.ticket}
+                                        Ticket Number: {task.ticketNumber}
                                     </CardContent>
                                     <CardContent style={{ paddingBottom: "1%", fontSize: "110%" }}>
-                                        Task Start Time: {task.taskTime}
+                                        Task Start Time: {task.scheduledTime}
                                     </CardContent>
                                     <CardContent style={{ paddingBottom: "1%", fontSize: "110%" }}>
-                                        Start Location: {task.startPoint}
+                                        Start Location: {task.startPointId}
                                     </CardContent>
                                     <CardContent style={{ paddingBottom: "1%", fontSize: "110%" }}>
-                                        Destination: {task.airportLoc}
+                                        Destination: {task.destinationId}
                                     </CardContent>
                                     <CardContent style={{ paddingBottom: "2%", fontSize: "110%" }}>
                                         Status: {task.status}
                                     </CardContent>
                                 </Card>
                             </div>
-                            
                         ))
                     ) : (
                         <p>Loading tasks or no tasks available.</p>

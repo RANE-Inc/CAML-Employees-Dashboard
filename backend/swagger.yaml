@@ -59,6 +59,32 @@ paths:
       summary: "Logs out user"
       description: "Clears credential cookies, removing users access to the system"
       responses: {}
+  "/api/auth/check-auth":
+    get:
+      tags:
+        - "Auth"
+      summary: "Dummy endpoint for checking authentication"
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+          required: false
+      responses: {}
+  "/api/auth/check-admin":
+    get:
+      tags:
+        - "Auth"
+      summary: "Dummy endpoint for checking admin privlages"
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+          required: false
+      responses: {}
 
 
   "/api/airports":
@@ -111,6 +137,7 @@ paths:
               required:
                 - airportCode
                 - name
+                - location
               properties:
                 airportCode:
                   type: string
@@ -118,6 +145,9 @@ paths:
                 name:
                   type: string
                   description: Name of the airport.
+                location:
+                  type: string
+                  description: Location of the airport.
       responses: {}
     # TODO:
     # delete:
@@ -320,6 +350,8 @@ paths:
               required:
                 - taskId
                 - cartId
+                - customerName
+                - ticketNumber
                 - startPointId
                 - destinationId
                 - scheduledTime
@@ -330,6 +362,12 @@ paths:
                 cartId:
                   type: string
                   description: Unique identifier for the cart.
+                customerName:
+                  type: string
+                  description: Name of the customer for verification
+                ticketNumber:
+                  type: string
+                  description: Ticket Number for verification
                 startPointId:
                   type: string
                   description: The unique identifier of a location within the airport, where a passanger is expected to be picked up.
@@ -355,7 +393,7 @@ paths:
           schema:
             type: string
         - in: query
-          name: userRole
+          name: role
           description: the role of the user. Currently one of either admin or user.
           schema:
             type: string
@@ -383,7 +421,7 @@ paths:
     post:
       tags:
         - Users
-      summary: Create a user task
+      summary: Create a user
       description: Adds a new user to the database with the provided username and password.
       parameters:
         - in: query
@@ -408,6 +446,23 @@ paths:
                   type: string
                   description: User's password
       responses: {}
+    delete:
+      tags:
+        - Users
+      summary: Removes the user from the system
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: username
+          description: Username of the user"
+          schema:
+            type: string
+          required: true
   "/api/user/role":
     patch:
       tags:
@@ -429,9 +484,9 @@ paths:
             schema:
               type: object
               required:
-                - userRole
+                - role
               properties:
-                username:
+                role:
                   type: string
                   description: User's role
       responses: {}

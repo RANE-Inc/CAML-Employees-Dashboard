@@ -4,6 +4,8 @@ import api from '../api/axiosInstance'; // Import axios instance
 import { Button } from "../components/ui/button";
 import DropMyMenu from '../components/ui/dropMyMenu';
 
+// TODO: User new schemas
+
 function ScheduleCart() {
     const navigate = useNavigate();
     const { cartId } = useParams();
@@ -14,31 +16,27 @@ function ScheduleCart() {
     const [cart, setCart] = useState({});
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [username, setUsername] = useState('');
+    const [customerName, setCustomerName] = useState('');
     const [ticketNumber, setTicketNumber] = useState('');
 
     // Check authentication on component mount
     useEffect(() => {
-        api.get("/check-auth", { withCredentials: true })
+        api.get("/api/auth/check-auth", { withCredentials: true })
         .then(response => {
             console.log("API Response:", response.data);  // Log response to verify the role
-            if (response.data.role.toLowerCase() !== "admin") {
-                navigate("/locations");
-            } else {
-                setLoading(false);
-            }
+            setLoading(false);
         })
         .catch(error => {
             console.error("Auth Check Failed:", error);  // Log error if check fails
             navigate("/locations");
         });
-    }, [navigate]);    
-    
+    }, [navigate]);
+
 
     // Fetch cart details
     useEffect(() => {
         if (!cartId) return;
-        
+
         api.get('/api/cart', { params: { cartId } }) // Use api instead of axios
             .then((response) => {
                 console.log("API Response:", response.data);
@@ -56,20 +54,18 @@ function ScheduleCart() {
 
         try {
             const response = await api.post( // Use api instead of axios
-                '/api/tasks',
+                '/api/cart/task',
                 {
-                    taskID: cartId, 
-                    airport: cart.airport,
-                    CartNum: cart.cartNum,
-                    customer: username,
-                    ticket: ticketNumber,
-                    startPoint: selectedStart || "Gate A",
-                    airportLoc: selectedDestination || "Gate A",
-                    taskTime: selectedTime && selectedAMPM ? `${selectedTime} ${selectedAMPM}` : "1:00 PM",
-                    status: "Pending"
-                }
+                    taskId: cartId+ticketNumber,
+                    cartId: cartId,
+                    customerName: customerName,
+                    ticketNumber: ticketNumber,
+                    startPointId: "string",
+                    destinationId: "string",
+                    scheduledTime: "2025-03-21T03:25:31.486Z"
+                  }
             );
-    
+
             console.log("API Response:", response.data);
             navigate(`/Dashboard/${cart.airport}`);
         } catch (error) {
@@ -93,12 +89,12 @@ function ScheduleCart() {
                         {/* Username Input */}
                         <label htmlFor='username'>Username</label>
                         <input
-                            id="username"
+                            id="customerName"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             className="bg-amber-200 p-2"
                             type="text"
-                            placeholder="Enter Username"
+                            placeholder="Enter customer's name"
                         />
 
                         {/* Ticket Number Input */}

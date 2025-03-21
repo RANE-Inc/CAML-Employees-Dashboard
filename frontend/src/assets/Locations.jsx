@@ -12,6 +12,10 @@ import axios from 'axios';
 import e from 'cors';
 import { useState, useEffect } from 'react';
 
+// TODO: To display some details about carts in a location, such as the number of carts move the card
+//       from the Locations component into it's own component. That new component can call /api/carts
+//       with its airportCode.
+
 function Locations(){
 
 
@@ -20,7 +24,7 @@ function Locations(){
 
     useEffect(() => {
         axios
-            .get('http://localhost:4000/api/airports')
+            .get('http://localhost:4000/api/airports',{ withCredentials: true })
             .then((response) => {
                 console.log("API Response:", response.data); // Debug API data
                 setAirports(response.data);
@@ -30,7 +34,7 @@ function Locations(){
                 setError("Failed to fetch carts. Please try again later.");
             });
     }, []);
-    
+
     return(
         <div>
             <DropMyMenu/>
@@ -38,10 +42,10 @@ function Locations(){
             <div style={{position:"absolute", top:"8%", left:"15%"}} className="grid gap-12 p-4 sm:grid-cols-3 md:grid-cols-4">
                 {Airports.map((airport) =>
                     <div key={airport.airportCode} className='max-w-xs text-left'>
-                        <Card className="bg-amber-400 h-[150px] w-[115%]">
-                            <CardTitle style={{paddingLeft:"7%", paddingTop:"3%", fontSize:"160%"}}>{airport.location}</CardTitle>
-                            <CardContent style={{paddingTop:"3%", paddingBottom:"1%", fontSize:"110%"}}>Code: {airport.airportCode} </CardContent>
-                            <CardContent style={{paddingBottom:"2%", fontSize:"110%"}}>Carts: {airport.numberOfCarts} </CardContent>
+                        <Card className="bg-amber-400 h-[200px] w-[115%]">
+                            <CardTitle style={{paddingLeft:"7%", paddingTop:"3%", fontSize:"160%"}}>{airport.name}</CardTitle>
+                            <CardContent style={{paddingTop:"3%", paddingBottom:"1%", fontSize:"110%"}}>Location: {airport.location} </CardContent>
+                            <CardContent style={{paddingBottom:"2%", fontSize:"110%"}}>Code: {airport.airportCode} </CardContent>
                             <div style={{paddingLeft:'4%'}}>
                                 <Button style={{fontSize:'100%', paddingLeft:''}} variant="secondary"  className="bg-amber-600" type='submit'>
                                     <Link style={{color:"white" }} to={`/Dashboard/${airport.airportCode}`}>Select</Link>

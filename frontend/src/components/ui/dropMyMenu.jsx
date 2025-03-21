@@ -16,7 +16,7 @@ function DropMyMenu() {
   const handleSignOut = async () => {
       try {
           // Call the backend logout endpoint to clear cookies
-          await axios.post('http://localhost:4000/logout'); 
+          await axios.post('http://localhost:4000/api/auth/logout');
 
           // Redirect user to the login or home page after logging out
           navigate('/');
@@ -49,9 +49,9 @@ function DropMyMenu() {
                   </DropdownMenuItem>
                   {/* Sign-out Button */}
                   <DropdownMenuItem className="bg-amber-300">
-                      <Button 
-                          style={{ fontSize: "120%", color:"White" }} 
-                          variant="secondary"  
+                      <Button
+                          style={{ fontSize: "120%", color:"White" }}
+                          variant="secondary"
                           className="w-[110px] bg-amber-600"
                           onClick={handleSignOut} // Call the sign-out function
                       >

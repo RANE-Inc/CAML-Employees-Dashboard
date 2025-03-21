@@ -14,14 +14,10 @@ function Signup() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        api.get("/check-auth", { withCredentials: true })
+        api.get("/api/auth/check-admin", { withCredentials: true })
         .then(response => {
             console.log("API Response:", response.data);  // Log response to verify the role
-            if (response.data.role.toLowerCase() !== "admin") {
-                navigate("/locations");
-            } else {
-                setLoading(false);
-            }
+            setLoading(false);
         })
         .catch(error => {
             console.error("Auth Check Failed:", error);  // Log error if check fails
@@ -38,7 +34,7 @@ function Signup() {
             return;
         }
 
-        axios.post("http://localhost:4000/register", { username, password })
+        axios.post("http://localhost:4000/api/user", { username, password }, { withCredentials: true })
             .then(() => navigate("/AdminDashboard"))
             .catch(() => setError("Signup failed. Try again."));
     };

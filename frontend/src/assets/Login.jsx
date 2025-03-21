@@ -14,8 +14,8 @@ function Login() {
         setError(""); // Clear previous errors
 
         try {
-            await axios.post("http://localhost:4000/login", 
-                { username, password }, 
+            await axios.post("http://localhost:4000/api/auth/login",
+                { username, password },
                 { withCredentials: true } // Important! Enables cookies
             );
             navigate("/Locations"); // Redirect on success
@@ -30,7 +30,7 @@ function Login() {
                 Welcome To
             </div>
             <div style={{fontSize:"250%", color:"SaddleBrown"}}>
-                CAML Autonomous Mobility Lift  
+                CAML Autonomous Mobility Lift
             </div>
             <form className="grid grid-cols-1" style={{ paddingTop: '5%' }} onSubmit={handleSubmit}>
                 <div style={{ paddingTop: "5%" }}>
