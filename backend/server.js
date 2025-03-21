@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 import cookieParser from 'cookie-parser';
@@ -82,7 +83,11 @@ const cartSchemas = {
     destinationId: String,
     scheduledTime: Date,
     status: {type: String, enum: ["Scheduled", "Waiting", "In Progress", "Completed", "On detour", "Cancelled"]}
-  })
+  }),
+  auth: new mongoose.Schema({
+    cartId: String,
+    apiKey: String,
+  }),
 };
 
 const UserSchema = new mongoose.Schema({
@@ -100,7 +105,8 @@ const Airport = {
 const Cart = {
   Meta: mongoose.model('carts.metas', cartSchemas.meta),
   Status: mongoose.model('carts.statuses', cartSchemas.status),
-  Task: mongoose.model('carts.tasks', cartSchemas.task)
+  Task: mongoose.model('carts.tasks', cartSchemas.task),
+  Auth: mongoose.model('carts.auths', cartSchemas.auth),
 };
 
 const User = mongoose.model('users', UserSchema);
@@ -120,7 +126,30 @@ app.use(cors({
 app.use(cookieParser());
 
 //// Middlewares
+async function apiKeyMiddleware(req, res, next) {
+  if(!req.query.cartId || !req.query.apiKey) return next();
+
+  const credentials = await Cart.Auth.findOne({ cartId: req.query.cartId }).exec();
+
+  if(!credentials || !(await bcrypt.compare(req.query.apiKey, credentials.apiKey))) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const cart = await Cart.Meta.findOne({cartId: credentials.cartId}).exec();
+
+  if(!cart) {
+    console.error("apiKeyMiddleware: cart has credentials but there's no cart associated with it.");
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+
+  req.cart = true;
+  Object.assign(req.query, cart);
+
+  return next();
+}
+
 async function authMiddleware(req, res, next) {
+    if(req.cart) return next(); // if a valid apiKey has been provided, skip authentication
     const token = req.query.accessToken || req.cookies.accessToken; // Access token expires after 15mins, so it's ok to pass as query parameter
 
     if (!token) return res.status(401).json({ message: 'Access denied' });
@@ -139,17 +168,17 @@ async function authMiddleware(req, res, next) {
         return res.status(401).json({ message: 'Invalid or expired token' });
     }
 
-    next();
-};
+    return next();
+}
 
 function adminMiddleware(req, res, next) {
   // Assumes authMiddleware ran before it
-  if(req.user.role !== "admin") {
+  if(req.cart || req.user.role !== "admin") {
     return res.status(403).json({ message: "This resource restricted to admin users only." })
   }
 
-  next();
-};
+  return next();
+}
 
 // Checks req.query for required strings
 function queryStringsMiddleware(requiredStrings) {
@@ -158,7 +187,7 @@ function queryStringsMiddleware(requiredStrings) {
       if(!req.query[requiredStrings[i]]) return res.status(400).send(requiredStrings[i]+" query string is missing");
     }
 
-    next();
+    return next();
   };
 }
 
@@ -169,7 +198,7 @@ function requestBodyMiddleware(requiredKeys) {
       if(!req.body[requiredKeys[i]]) return res.status(400).send(requiredKeys[i]+" property is missing");
     }
 
-    next();
+    return next();
   };
 }
 
@@ -252,6 +281,7 @@ app.post('/api/auth/logout', (req, res) => {
   return res.status(200).json({ message: "Logged out successfully" });
 });
 
+// vvv Potential DDOS/Bruteforce vector vvv
 app.get("/api/auth/check-auth", authMiddleware, (req, res) => {
   // Dummy endpoint to check if user is authenticated
 
@@ -263,6 +293,13 @@ app.get("/api/auth/check-admin", authMiddleware, adminMiddleware, (req, res) => 
 
   return res.status(200).json({ message: "admin permissions available" })
 });
+
+app.get("/api/auth/check-api-key", apiKeyMiddleware, (req, res) => {
+  // Dummy endpoint to check if api key is valid
+
+  return res.status(200).json({ message: "Api key is valid." }); // TODO: Add the cart info to return
+})
+
 
 ////// Airports
 app.get('/api/airports', authMiddleware, async (req, res) => {
@@ -315,7 +352,7 @@ app.post('/api/airport', authMiddleware, adminMiddleware, requestBodyMiddleware(
 
 // TODO: app.delete('/api/airport') - deletes airport, all the carts belonging to that airport and all the tasks belonging to those carts
 
-app.get('/api/airport/destinations', authMiddleware, queryStringsMiddleware(["airportCode"]), async (req, res) => {
+app.get('/api/airport/destinations', apiKeyMiddleware, authMiddleware, queryStringsMiddleware(["airportCode"]), async (req, res) => {
   try {
     const airportDestinations = await Airport.Destination.find({airportCode: req.query.airportCode});
     res.send(airportDestinations);
@@ -363,6 +400,8 @@ app.post('/api/cart', authMiddleware, adminMiddleware, requestBodyMiddleware(["a
 
     if(await Cart.Meta.exists({cartId: cartId}).exec()) return res.status(400).send("Cart already exists.");
 
+    const apiKey = crypto.randomBytes(32).toString('hex');
+
     Cart.Meta.create({
       cartId: cartId,
       name: req.body.name,
@@ -377,15 +416,19 @@ app.post('/api/cart', authMiddleware, adminMiddleware, requestBodyMiddleware(["a
       destinationId: null
     });
 
+    Cart.Auth.create({
+      cartId: cartId,
+      apiKey: await bcrypt.hash(apiKey, 10),
+    })
+
     // console.log("Created Location: ", savedCart);
-    return res.status(201).json({ message: "Cart created successfully." })
+    return res.status(201).json({ message: "Cart created successfully.", apiKey: apiKey });
   }catch(error){
     console.error("Error during '/api/cart' POST request:", error);
     return res.status(500).json({error: "Internal Server Error"});
   }
 });
 
-// TODO: Delete all the tasks of the cart as well
 app.delete('/api/cart', authMiddleware, adminMiddleware, queryStringsMiddleware(["cartId"]), async(req, res) => {
   // console.log('Deleting Cart')
   try{
@@ -397,6 +440,8 @@ app.delete('/api/cart', authMiddleware, adminMiddleware, queryStringsMiddleware(
     }
 
     await Cart.Status.deleteOne({cartId: req.query.cartId});
+    await Cart.Task.deleteMany({ cartId: req.query.cartId });
+    await Cart.Auth.deleteOne({ cartId: req.query.cartId });
 
     return res.status(204).json({ message:"Cart succesfully deleted." });
   } catch (err) {
@@ -405,7 +450,7 @@ app.delete('/api/cart', authMiddleware, adminMiddleware, queryStringsMiddleware(
   }
 })
 
-app.get('/api/cart/status', authMiddleware, queryStringsMiddleware(["cartId"]), async (req, res) => { // TODO: update swagger
+app.get('/api/cart/status', apiKeyMiddleware, authMiddleware, queryStringsMiddleware(["cartId"]), async (req, res) => {
   try {
     // console.log('CartId:', req.query.cartId);
     const status = await Cart.Status.findOne({cartId: req.query.cartId});
@@ -422,7 +467,7 @@ app.get('/api/cart/status', authMiddleware, queryStringsMiddleware(["cartId"]), 
   }
 });
 
-app.get('/api/cart/map', authMiddleware, queryStringsMiddleware(["cartId"]), (req, res) => {
+app.get('/api/cart/map', apiKeyMiddleware, authMiddleware, queryStringsMiddleware(["cartId"]), (req, res) => {
   if (mapData[req.query.cartId]) {
       res.json(mapData);
   } else {
@@ -430,10 +475,13 @@ app.get('/api/cart/map', authMiddleware, queryStringsMiddleware(["cartId"]), (re
   }
 });
 
-app.get('/api/cart/tasks', authMiddleware, async (req, res) => { // TODO: Swagger
+app.get('/api/cart/tasks', apiKeyMiddleware, authMiddleware, async (req, res) => {
   try {
     // console.log('Searching for task with CartId:', req.query.cartId);
-    const cartTasks = await Cart.Task.find(req.query.cartId ? {cartId: req.query.cartId} : {}).exec();
+    const filter = req.query.cartId ? {cartId: req.query.cartId} : {}; // if cart, this query string will be set
+    if(req.cart) filter.status = { $nin: ["Scheduled", "Completed", "Cancelled"] } // Limit TouchUI to only see the current task
+
+    const cartTasks = await Cart.Task.find(filter).exec();
     // console.log(cartTasks)
     res.send(cartTasks);
     // console.log('Tasks retrieved');
@@ -631,7 +679,7 @@ const map_topic = new ROSLIB.Topic({
 map_topic.subscribe((message) => {
   // This should also serve as a update function whenever OccupancyGrid message is received.
   // console.log('Received map data:', message);
-  mapData = message; // Store the latest map data
+  mapData.luggage_av = message; // Store the latest map data
 
   // Emit data to clients connected via WebSocket
   io.emit('mapData', message);

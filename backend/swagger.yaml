@@ -85,7 +85,25 @@ paths:
             type: string
           required: false
       responses: {}
-
+  "/api/auth/check-api-key":
+    get:
+      tags:
+        - "Auth"
+      summary: "Dummy endpoint for checking api keys"
+      parameters:
+        - in: query
+          name: cartId
+          description: cartId of the cart.
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: apiKey
+          description: apiKey of the cart.
+          schema:
+            type: string
+          required: true
+      responses: {}
 
   "/api/airports":
     get:
@@ -162,15 +180,29 @@ paths:
       summary: Find all the destinations in an airport with a given airportCode.
       parameters:
         - in: query
+          name: cartId
+          description: cartId of the cart for apiKey authentication.
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: apiKey
+          description: API key of the cart for apiKey authentication.
+          schema:
+            type: string
+          required: false
+        - in: query
           name: accessToken
           description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
           schema:
             type: string
+          required: false
         - name: airportCode
           in: query
-          description: Unique, identifiable code of an airport or terminal
+          description: Unique, identifiable code of an airport or terminal. If using apiKey auth, it can be skipped.
           schema:
             type: string
+          required: false
       responses: {}
 
 
@@ -265,16 +297,22 @@ paths:
       summary: Returns the current status of the Cart.
       parameters:
         - in: query
+          name: cartId
+          description: cartId of the cart. Needed for apiKey authentication.
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: apiKey
+          description: API key of the cart for apiKey authentication.
+          schema:
+            type: string
+          required: false
+        - in: query
           name: accessToken
           description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
           schema:
             type: string
-        - in: query
-          name: cartId
-          description: ID of the cart.
-          schema:
-            type: string
-          required: true
       responses: {}
   "/api/cart/map":
     get:
@@ -283,16 +321,22 @@ paths:
       summary: Returns the map of the Cart.
       parameters:
         - in: query
+          name: cartId
+          description: cartId of the cart. Needed for apiKey authentication.
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: apiKey
+          description: API key of the cart for apiKey authentication.
+          schema:
+            type: string
+          required: false
+        - in: query
           name: accessToken
           description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
           schema:
             type: string
-        - in: query
-          name: cartId
-          description: ID of the cart.
-          schema:
-            type: string
-          required: true
       responses: {}
   "/api/cart/tasks":
     get:
@@ -301,16 +345,22 @@ paths:
       summary: Returns all the tasks or all the tasks of a cart.
       parameters:
         - in: query
+          name: cartId
+          description: cartId of the cart. Needed for apiKey authentication.
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: apiKey
+          description: API key of the cart for apiKey authentication.
+          schema:
+            type: string
+          required: false
+        - in: query
           name: accessToken
           description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
           schema:
             type: string
-        - in: query
-          name: cartId
-          description: ID of the cart.
-          schema:
-            type: string
-          required: false
       responses: {}
   "/api/cart/task":
     get:
