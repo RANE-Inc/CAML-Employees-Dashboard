@@ -22,10 +22,8 @@ import ROSLIB from 'roslib';
 // TODO: Logging
 //// TODO: Error messages logs, change to console.error() and specify request type
 //// TODO: Normalize all Internal Server Errors
-// TODO: Change all IDs to Ids
+//// TODO: Cleanup commented debug logs
 // FIXME: Double not supported? Chaning to Number for now
-// TODO: auth middlewares
-// TODO: Mongoose insert vs new Model + save()?
 // TODO: Update res.send(String) to res.json({message: String})
 // TODO: Validate schema middleware
 // TODO: Mongoose exec()
@@ -52,10 +50,10 @@ const airportSchemas = {
     location: String,
   }),
   destination: new mongoose.Schema({
-    airportCode: String,
     destinationId: String,
+    airportCode: String,
     name: String,
-    type: {type: String, enum: ["Pickup", "Gate", "Bathroom", "Store", "Other"]},
+    type: {type: String, enum: ["Pickup", "Gate", "Bathroom", "Store", "Restaurant", "Other"]},
     location: [Number],
     zone: [[Number]]
   })
@@ -297,7 +295,7 @@ app.get("/api/auth/check-admin", authMiddleware, adminMiddleware, (req, res) => 
 app.get("/api/auth/check-api-key", apiKeyMiddleware, (req, res) => {
   // Dummy endpoint to check if api key is valid
 
-  return res.status(200).json({ message: "Api key is valid." }); // TODO: Add the cart info to return
+  return res.status(200).json({ message: "Api key is valid." });
 })
 
 
@@ -350,7 +348,34 @@ app.post('/api/airport', authMiddleware, adminMiddleware, requestBodyMiddleware(
   }
 });
 
-// TODO: app.delete('/api/airport') - deletes airport, all the carts belonging to that airport and all the tasks belonging to those carts
+app.delete('/api/airport', authMiddleware, adminMiddleware, queryStringsMiddleware(["airportCode"]), async(req, res) => {
+  try{
+    const result = await Airport.Meta.deleteOne({airportCode: req.query.airportCode}).exec();
+
+    if(result.deletedCount === 0){
+      return res.status(404).json({ message: "Airport not found." });
+    }
+
+    await Airport.Destination.deleteMany({airportCode: req.query.airportCode});
+
+    const carts = await Cart.Meta.find({ airportCode: req.query.airportCode });
+
+    if(carts.length > 0) {
+      const cartIds = carts.map(cart => cart.cartId || null).filter(cartId => cartId);
+
+      await Cart.Meta.deleteMany({ cartId: { $in: cartIds } }).exec();
+      await Cart.Status.deleteMany({ cartId: { $in: cartIds } }).exec();
+      await Cart.Task.deleteMany({ cartId: { $in: cartIds } }).exec();
+      await Cart.Auth.deleteMany({ cartId: { $in: cartIds } }).exec();
+    }
+
+
+    return res.status(204).json({ message:"Airport succesfully deleted." });
+  } catch (err) {
+    console.error("Error during /api/airport/ DELETE request:", err);
+    res.status(500).json({message: "Internal Server Error"});
+  }
+})
 
 app.get('/api/airport/destinations', apiKeyMiddleware, authMiddleware, queryStringsMiddleware(["airportCode"]), async (req, res) => {
   try {
@@ -362,6 +387,63 @@ app.get('/api/airport/destinations', apiKeyMiddleware, authMiddleware, queryStri
       res.status(500).send({ error: "Internal Server Error" });
   }
 });
+
+app.get('/api/airport/destination', apiKeyMiddleware, authMiddleware, queryStringsMiddleware(["destinationId"]), async (req, res) => {
+  try {
+    const destination = await Airport.Destination.findOne({destinationId: req.query.destinationId}).exec();
+
+    if(!destination) {
+      return res.status(404).json({ message: "There is no destination with that destinationId" })
+    }
+
+    // console.log('Airports retrieved');
+    return res.send(destination);
+  } catch (error) {
+      console.error("Error during /api/airport/destination GET request:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+app.post('/api/airport/destination', authMiddleware, adminMiddleware, requestBodyMiddleware(["destinationId", "airportCode", "name", "type", "location", "zone"]), async (req,res) => {
+  // console.log('Location: ', req.body);
+  try{
+    if(await Airport.Destination.findOne({destinationId: req.body.destinationId}).exec()) {
+      return res.status(409).json({ message: "Destination already exists!" })
+    }
+
+    await Airport.Destination.create({
+      destinationId: req.body.destinationId,
+      airportCode: req.body.airportCode,
+      name: req.body.name,
+      type: req.body.type,
+      location: JSON.parse(req.body.location), // FIXME: JS Injection?
+      zone: JSON.parse(req.body.zone), // FIXME: JS Injection?
+    });
+
+    // console.log("Created Location: ", savedLoc);
+    return res.status(201).json({ message: "Destination created successfully." });
+  }catch(error){
+    console.error("Error during /api/airport/destination POST request:", error);
+    res.status(500).json({error: "Internal Server Error"});
+  }
+});
+
+app.delete('/api/airport/destination', authMiddleware, adminMiddleware, queryStringsMiddleware(["destinationId"]), async(req, res) => {
+  try{
+    const result = await Airport.Destination.deleteOne({destinationId: req.query.destinationId}).exec();
+
+    if(result.deletedCount === 0){
+      return res.status(404).json({ message: "Destination not found." });
+    }
+
+
+    return res.status(204).json({ message:"Destination succesfully deleted." });
+  } catch (err) {
+    console.error("Error during /api/airport/destination DELETE request:", err);
+    res.status(500).json({message: "Internal Server Error"});
+  }
+})
+
 
 ////// Carts
 app.get('/api/carts', authMiddleware, async (req, res) => {
@@ -376,7 +458,7 @@ app.get('/api/carts', authMiddleware, async (req, res) => {
   }
 });
 
-app.get('/api/cart', authMiddleware, queryStringsMiddleware(["cartId"]), async (req, res) => { // TODO: update swagger
+app.get('/api/cart', authMiddleware, queryStringsMiddleware(["cartId"]), async (req, res) => {
   try {
     // console.log('CartId:', req.query.cartId);
     const cart = await Cart.Meta.findOne({cartId: req.query.cartId});
@@ -491,7 +573,7 @@ app.get('/api/cart/tasks', apiKeyMiddleware, authMiddleware, async (req, res) =>
   }
 });
 
-app.get('/api/cart/task', authMiddleware, queryStringsMiddleware(["taskId"]), async (req, res) => { // TODO: Swagger
+app.get('/api/cart/task', authMiddleware, queryStringsMiddleware(["taskId"]), async (req, res) => {
   try {
     // console.log('Searching for task with CartId:', req.query.cartId);
     const cartTask = await Cart.Task.findOne({taskId: req.query.taskId}).exec();
@@ -531,10 +613,25 @@ app.post('/api/cart/task', authMiddleware, requestBodyMiddleware(["taskId", "car
   }
 });
 
-// TODO: app.delete('/api/cart/task')
+app.delete('/api/cart/task', authMiddleware, queryStringsMiddleware(["taskId"]), async(req, res) => {
+  // console.log('Deleting Cart')
+  try{
+    // console.log(req.params.cartId)
+    const result = await Cart.Task.deleteOne({taskId: req.query.taskId}).exec();
+
+    if(result.deletedCount === 0){
+      return res.status(404).json({ message: "Task not found." });
+    }
+
+    return res.status(204).json({ message:"Task succesfully deleted." });
+  } catch (err) {
+    console.error("Error during /api/cart/task DELETE request:", err);
+    res.status(500).json({message: "Internal Server Error"});
+  }
+})
 
 ////// Users
-app.get('/api/users', authMiddleware, adminMiddleware, async (req, res) => { // TODO: Swagger
+app.get('/api/users', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const users = await User.find(req.query.role ? {role: req.query.role} : {}).exec();
     res.send(users);
@@ -545,7 +642,7 @@ app.get('/api/users', authMiddleware, adminMiddleware, async (req, res) => { // 
   }
 });
 
-app.get('/api/user', authMiddleware, adminMiddleware, queryStringsMiddleware(["username"]), async (req, res) => { // TODO: Swagger
+app.get('/api/user', authMiddleware, adminMiddleware, queryStringsMiddleware(["username"]), async (req, res) => {
   try {
     const user = await User.findOne({username: req.query.username}).exec();
 
@@ -561,7 +658,6 @@ app.get('/api/user', authMiddleware, adminMiddleware, queryStringsMiddleware(["u
   }
 });
 
-TODO:
 app.post('/api/user', authMiddleware, adminMiddleware, requestBodyMiddleware(["username", "password"]), async (req, res) => {
   try {
     const { username, password } = req.body;

@@ -167,12 +167,23 @@ paths:
                   type: string
                   description: Location of the airport.
       responses: {}
-    # TODO:
-    # delete:
-    #   tags:
-    #   - Airports
-    #   summary: remove an airport
-    #     responses: {}
+    delete:
+      tags:
+        - Airports
+      summary: Remove an Airport from the system and carts associated with it.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: airportCode
+          description: Unique, identifiable code of an airport or terminal.
+          schema:
+            type: string
+          required: true
+      responses: {}
   "/api/airport/destinations":
     get:
       tags:
@@ -203,6 +214,84 @@ paths:
           schema:
             type: string
           required: false
+      responses: {}
+  "/api/airport/destination":
+    get:
+      tags:
+        - Airports
+      summary: Find an destination with a given destinationId.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: destinationId
+          description: Unique, identifiable code of an destination in an airport.
+          schema:
+            type: string
+      responses: {}
+    post:
+      tags:
+      - Airports
+      summary: Create a new Destination entry.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - destinationId
+                - airportCode
+                - name
+                - type
+                - location
+                - zone
+              properties:
+                destinationId:
+                  type: string
+                  description: Unique, identifiable identifier of an destination in an airport or terminal.
+                airportCode:
+                  type: string
+                  description: Unique, identifiable code of an airport or terminal.
+                name:
+                  type: string
+                  description: Name of the destination.
+                type:
+                  type: string
+                  destination: Type of the destination
+                location:
+                  type: string
+                  description: JSON-encoded string representing location at the airport. Should be represented as [x, y] where x and y are coordinates on a map.
+                zone:
+                  type: string
+                  description: JSON-encoded string representing a bounding box around a destination. Should be represented as [[x1, y1], [x2, y2]] where lists represent 2 point's of the rectangle (bottom left and top right).
+      responses: {}
+    delete:
+      tags:
+        - Airports
+      summary: Remove a destination from the system.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: destinationId
+          description: Unique, identifiable identifier of a destination.
+          schema:
+            type: string
+          required: true
       responses: {}
 
 
@@ -272,7 +361,6 @@ paths:
                   type: string
                   description: Name of the cart (usually in a form of a number).
       responses: {}
-    # TODO: Remove all tasks as well
     delete:
       tags:
         - Carts
@@ -428,6 +516,23 @@ paths:
                   type: string
                   format: date-time
                   description: Timestamp of the beginning of the task.
+      responses: {}
+    delete:
+      tags:
+        - Carts
+      summary: Removes the task with a given taskId.
+      parameters:
+        - in: query
+          name: accessToken
+          description: Access Token for testing purposed. In production, accessToken should be provided through a cookie.
+          schema:
+            type: string
+        - in: query
+          name: taskId
+          description: ID of the task.
+          schema:
+            type: string
+          required: true
       responses: {}
 
 
