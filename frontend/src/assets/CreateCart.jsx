@@ -50,10 +50,10 @@ function CreateCart(){
 
         try{
             const response = await api.post( // Use api instead of axios
-                '/api/createCart',
+                '/api/cart',
                 {
                     airportCode: selectedLocation,
-                    location: AirportLocation,
+                    name: "default",
                 }
             );
             console.log("API Response: ", response.data);
@@ -61,7 +61,7 @@ function CreateCart(){
         }catch (error){
             console.error("API Error:", error);
             setError("Failed to create cart.");
-            alert("Failed to create cart");
+            alert("Failed to create cart" + error);
         }
     }
 

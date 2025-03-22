@@ -60,17 +60,17 @@ function ScheduleCart() {
                     cartId: cartId,
                     customerName: customerName,
                     ticketNumber: ticketNumber,
-                    startPointId: "string",
-                    destinationId: "string",
+                    startPointId: selectedStart,
+                    destinationId: selectedDestination,
                     scheduledTime: "2025-03-21T03:25:31.486Z"
                   }
             );
 
             console.log("API Response:", response.data);
-            navigate(`/Dashboard/${cart.airport}`);
+            navigate(`/Dashboard/${cart.airportCode}`);
         } catch (error) {
             console.error("API Error:", error);
-            setError("Failed to create task. Please try again later.");
+            setError("Failed to create task. Please try again later. " + error);
         }
     };
 
@@ -82,16 +82,16 @@ function ScheduleCart() {
             <DropMyMenu />
 
             <div style={{ fontFamily: 'Kanit', position: "absolute", top: "20%", left: '42%' }}>
-                <div style={{ fontSize: "250%" }}>Schedule Cart {cart.cartNum}</div>
+                <div style={{ fontSize: "250%" }}>Schedule Cart {cart.cartId}</div>
 
                 <form className="grid grid-cols-1" style={{ paddingTop: '5%' }} onSubmit={handleSubmit}>
                     <div className="grid grid-4" style={{ fontSize: "150%", paddingTop: '5%' }}>
                         {/* Username Input */}
-                        <label htmlFor='username'>Username</label>
+                        <label htmlFor='username'>Customer Name</label>
                         <input
                             id="customerName"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            value={customerName}
+                            onChange={(e) => setCustomerName(e.target.value)}
                             className="bg-amber-200 p-2"
                             type="text"
                             placeholder="Enter customer's name"
@@ -136,11 +136,12 @@ function ScheduleCart() {
                         {/* Select Start Location */}
                         <label htmlFor='Start' style={{ paddingTop: '3%' }}>Select Start Location</label>
                         <select
-                            id="Start"
+                            id="selectedStart"
                             value={selectedStart}
                             onChange={(e) => setSelectedStart(e.target.value)}
                             className='bg-amber-200'
                         >
+                            <option value="" disabled>Select a Start Location</option>
                             {["Gate A", "Gate B", "Gate C", "Charging Station"].map((loc) => (
                                 <option key={loc} value={loc}>{loc}</option>
                             ))}
@@ -149,11 +150,12 @@ function ScheduleCart() {
                         {/* Select Destination */}
                         <label htmlFor='Destination' style={{ paddingTop: '3%' }}>Select Destination</label>
                         <select
-                            id="Destination"
+                            id="selectedDestination"
                             value={selectedDestination}
                             onChange={(e) => setSelectedDestination(e.target.value)}
                             className='bg-amber-200'
                         >
+                            <option value="" disabled>Select a Destination</option>
                             {["Gate A", "Gate B", "Gate C", "Charging Station"].map((loc) => (
                                 <option key={loc} value={loc}>{loc}</option>
                             ))}

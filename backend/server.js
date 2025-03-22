@@ -204,7 +204,6 @@ function requestBodyMiddleware(requiredKeys) {
 ////// Auth
 app.post('/api/auth/login', requestBodyMiddleware(["username", "password"]), async (req, res) => {
   const { username, password } = req.body;
-
   try {
       const user = await User.findOne({ username });
       if (!user || !(await bcrypt.compare(password, user.password))) { // FIXME: await highlighted as unnecessary, although correct
@@ -334,8 +333,8 @@ app.get('/api/airport', authMiddleware, queryStringsMiddleware(["airportCode"]),
   }
 });
 
-app.post('/api/airport', authMiddleware, adminMiddleware, requestBodyMiddleware(["airportCode", "name", "location"]), async (req,res) => {
-  // console.log('Location: ', req.body);
+app.post('/api/createAirport', authMiddleware, adminMiddleware, requestBodyMiddleware(["airportCode", "name", "location"]), async (req,res) => {
+  console.log('Location: ', req.body.location);
   try{
     if(await Airport.Meta.findOne({airportCode: req.body.airportCode}).exec()) {
       return res.status(409).json({ message: "Airport already exists!" })
@@ -485,7 +484,7 @@ app.get('/api/cart', authMiddleware, queryStringsMiddleware(["cartId"]), async (
 app.post('/api/cart', authMiddleware, adminMiddleware, requestBodyMiddleware(["airportCode", "name"]), async (req,res) => {
   // console.log('Cart: ', req.body);
   try{
-    const cartId = req.body.airportCode + req.body.name;
+    const cartId = req.body.airportCode + "-" + req.body.name;
 
     if(await Cart.Meta.exists({cartId: cartId}).exec()) return res.status(400).send("Cart already exists.");
 
@@ -519,7 +518,7 @@ app.post('/api/cart', authMiddleware, adminMiddleware, requestBodyMiddleware(["a
 });
 
 app.delete('/api/cart', authMiddleware, adminMiddleware, queryStringsMiddleware(["cartId"]), async(req, res) => {
-  // console.log('Deleting Cart')
+  console.log('Deleting Cart')
   try{
     // console.log(req.params.cartId)
     const result = await Cart.Meta.deleteOne({cartId: req.query.cartId}).exec();

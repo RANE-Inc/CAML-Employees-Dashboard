@@ -34,19 +34,19 @@ function CreateLocation(){
         alert(((city) + ', ' + (state) + ', ' + (country)));
 
         try{
-            const response = await api.post( // Use api instead of axios
-                '/api/createLocation',
+            const response = await api.post('/api/createAirport',
                 {
                     location: ((city) + ', ' + (state) + ', ' + (country)),
-                    AP_Code: airportCode,
+                    name: "default",
+                    airportCode: airportCode,
                 }
             );
             console.log("API Response: ", response.data);
-            alert("Successfully Created Cart");
+            alert("Successfully Created Location");
         }catch (error){
             console.error("API Error:", error);
-            setError("Failed to create cart.");
-            alert("Failed to create cart");
+            setError("Failed to create location.");
+            alert("Failed to create location:"+ error);
         }
     }
 

@@ -90,7 +90,7 @@ function AdminDashboard() {
 
     const removeCart = async(cartId) => {
         axios
-            .delete(`http://localhost:4000/api/cart`,{ params: { cardId: cartId }, withCredentials: true })
+            .delete(`http://localhost:4000/api/cart`,{ params: { cartId: cartId }, withCredentials: true })
             .then((response) => {
                 console.log("API Response: ", response.data);
                 alert("Cart Succesfully deleted.");
@@ -196,7 +196,7 @@ function AdminDashboard() {
                     {carts.map((cart) =>
                         <TableRow >
                             <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{cart.cartId}</TableCell>
-                            <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{cart.airport}</TableCell>
+                            <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{cart.airportCode}</TableCell>
                             <TableCell className="text-centered">
                                 <Button onClick={() => (cart.cartID)} style={{fontSize:'70%', color:"white"}} variant="secondary" className="bg-amber-600">
                                     <Link style={{color:"white"}} to={`/ScheduleCart/${cart.cartId}`}>
