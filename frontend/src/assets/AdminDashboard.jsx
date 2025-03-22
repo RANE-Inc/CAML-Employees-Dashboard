@@ -25,14 +25,10 @@ function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        api.get("/check-auth", { withCredentials: true })
+        api.get("/api/auth/check-admin", { withCredentials: true })
         .then(response => {
             console.log("API Response:", response.data);  // Log response to verify the role
-            if (response.data.role.toLowerCase() !== "admin") {
-                navigate("/locations");
-            } else {
-                setLoading(false);
-            }
+            setLoading(false);
         })
         .catch(error => {
             console.error("Auth Check Failed:", error);  // Log error if check fails
@@ -42,7 +38,7 @@ function AdminDashboard() {
 
     useEffect(() => {
         axios
-            .get('http://localhost:4000/api/allUsers')
+            .get('http://localhost:4000/api/users',{ withCredentials: true })
             .then((response) => {
                 console.log("API Response:", response.data); // Debug API data
                 setUsers(response.data);
@@ -55,7 +51,7 @@ function AdminDashboard() {
 
     useEffect(() => {
         axios
-            .get('http://localhost:4000/api/allCarts')
+            .get('http://localhost:4000/api/carts',{ withCredentials: true })
             .then((response) => {
                 console.log("API Response:", response.data); // Debug API data
                 setCarts(response.data);
@@ -68,7 +64,7 @@ function AdminDashboard() {
 
     useEffect(() => {
         axios
-            .get('http://localhost:4000/api/airports')
+            .get("http://localhost:4000/api/airports",{ withCredentials: true })
             .then((response) => {
                 console.log("API Response:", response.data); // Debug API data
                 setAirports(response.data);
@@ -81,7 +77,7 @@ function AdminDashboard() {
 
     const removeUser = async(username) => {
         axios
-            .delete(`http://localhost:4000/api/deleteUser/${username}`)
+            .delete("http://localhost:4000/api/user",{ params: { username: username }, withCredentials: true })
             .then((response) => {
                 console.log("API Response: ", response.data);
                 alert("User Succesfully deleted.");
@@ -94,7 +90,7 @@ function AdminDashboard() {
 
     const removeCart = async(cartId) => {
         axios
-            .delete(`http://localhost:4000/api/deleteCart/${cartId}`)
+            .delete(`http://localhost:4000/api/cart`,{ params: { cardId: cartId }, withCredentials: true })
             .then((response) => {
                 console.log("API Response: ", response.data);
                 alert("Cart Succesfully deleted.");
@@ -108,7 +104,7 @@ function AdminDashboard() {
     const removeAirport = async(code) => {
         alert("To Be Implemented");
         axios
-            .delete(`http://localhost:4000/api/deleteLocation/${code}`)
+            .delete(`http://localhost:4000/api/airport`,{ params: { airportCode: code }, withCredentials: true })
             .then((response) => {
                 console.log("API Response: ", response.data);
                 alert("Location Succesfully deleted.");
@@ -119,9 +115,9 @@ function AdminDashboard() {
         });
     }
 
-    const toggleAdmin = async(username) => {
+    const toggleAdmin = async(username, role) => {
         axios
-            .patch(`http://localhost:4000/api/toggleAdmin/${username}`)
+            .patch('http://localhost:4000/api/user/role', {role: role === "admin" ? "user" : "admin"}, { params: { username: username }, withCredentials: true })
             .then((response) => {
                 console.log("API Response: ", response.data);
                 alert("Role Successfully Toggled.");
@@ -161,7 +157,7 @@ function AdminDashboard() {
                                 <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{user.username}</TableCell>
                                 <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{user.role}</TableCell>
                                 <TableCell className="text-centered">
-                                    <Button onClick={() => toggleAdmin(user.username)} style={{fontSize:'70%', color:"white"}} variant="secondary" className="bg-amber-600">
+                                    <Button onClick={() => toggleAdmin(user.username, user.role)} style={{fontSize:'70%', color:"white"}} variant="secondary" className="bg-amber-600">
                                         Toggle Admin
                                     </Button>
                                     {/*<Button onClick={changePassword} style={{fontSize:'70%', color:"white"}} variant="secondary" className="bg-red-700">

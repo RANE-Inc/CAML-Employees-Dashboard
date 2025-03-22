@@ -1,5 +1,5 @@
 {
-  "name": "carrymyluggage-ui-test-ryan",
+  "name": "caml-frontend",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -39,7 +39,7 @@
     "tailwindcss-ts": "^0.5.0",
     "vite": "^5.4.11"
   },
-  "description": "CarryMyLuggage Website",
+  "description": "CAML Frontend",
   "main": "eslint.config.js",
   "author": "",
   "license": "ISC"

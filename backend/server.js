@@ -1,37 +1,119 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import { MongoClient } from 'mongodb';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
-import { authMiddleware, adminMiddleware } from './middleware.js'
 import cookieParser from 'cookie-parser';
-import bodyParser from 'body-parser';
-import corsTablet from './middleware.js'; // Adjust path as necessary
-
-import swaggerUI from 'swagger-ui-express';
-///import swaggerDocument from './swagger.json' assert {type: "json"}   was causing error
-
-var swaggerOptions = {}
-
-//imports for OccupanceGridMap
 import http from 'http';
 import { Server } from 'socket.io';
+
+// Swagger
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+import YAML from 'yaml'
+
+// ROS
 import ROSLIB from 'roslib';
+
+
+// TODO: Logging
+//// TODO: Error messages logs, change to console.error() and specify request type
+//// TODO: Normalize all Internal Server Errors
+//// TODO: Cleanup commented debug logs
+// FIXME: Double not supported? Chaning to Number for now
+// TODO: Update res.send(String) to res.json({message: String})
+// TODO: Validate schema middleware
+// TODO: Mongoose exec()
 
 
 const env = dotenv.config();
 
 const PORT_2 = process.env.PORT_2 // port number
-const MONGODB_URL = process.env.MONGODB_URL // mongodb url
+const MONGODB_HOST = process.env.MONGODB_HOST // mongodb host
+const MONGODB_PORT = process.env.MONGODB_PORT // mongodb port
 
 
+
+// Mongo
+mongoose.connect("mongodb://"+MONGODB_HOST+":"+MONGODB_PORT+"/caml")
+  .then(() => console.log("Connected to MongoDB"))
+  .catch(err => console.error("MongoDB connection error:", err));
+
+//// Schemas
+const airportSchemas = {
+  meta: new mongoose.Schema({
+    airportCode: String,
+    name: String,
+    location: String,
+  }),
+  destination: new mongoose.Schema({
+    destinationId: String,
+    airportCode: String,
+    name: String,
+    type: {type: String, enum: ["Pickup", "Gate", "Bathroom", "Store", "Restaurant", "Other"]},
+    location: [Number],
+    zone: [[Number]]
+  })
+};
+
+const cartSchemas = {
+  meta: new mongoose.Schema({
+    cartId: String,
+    name: String,
+    airportCode: String,
+  }),
+  status: new mongoose.Schema({
+    cartId: String,
+    battery: Number,
+    status: {type: String, enum: ["Offline"]}, // TODO: More states
+    position: [Number],
+    destinationId: String
+  }),
+  task: new mongoose.Schema({
+    taskId: String,
+    cartId: String,
+    customerName: String,
+    ticketNumber: String,
+    startPointId: String,
+    destinationId: String,
+    scheduledTime: Date,
+    status: {type: String, enum: ["Scheduled", "Waiting", "In Progress", "Completed", "On detour", "Cancelled"]}
+  }),
+  auth: new mongoose.Schema({
+    cartId: String,
+    apiKey: String,
+  }),
+};
+
+const UserSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  role: { type: String, enum: ['admin', 'user'], default: 'user' },
+});
+
+//// Models
+const Airport = {
+  Meta: mongoose.model('airports.metas', airportSchemas.meta),
+  Destination: mongoose.model('airports.destinations', airportSchemas.destination)
+};
+
+const Cart = {
+  Meta: mongoose.model('carts.metas', cartSchemas.meta),
+  Status: mongoose.model('carts.statuses', cartSchemas.status),
+  Task: mongoose.model('carts.tasks', cartSchemas.task),
+  Auth: mongoose.model('carts.auths', cartSchemas.auth),
+};
+
+const User = mongoose.model('users', UserSchema);
+
+
+
+// Express
 const app = express();
 app.use(express.json());
-
-///app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument, swaggerOptions));  causing error
 
 app.use(cors({
   origin: "http://localhost:5173", // Specify frontend URL
@@ -41,491 +123,672 @@ app.use(cors({
 }));
 app.use(cookieParser());
 
-//we already have a database. We need to connect to it
+//// Middlewares
+async function apiKeyMiddleware(req, res, next) {
+  if(!req.query.cartId || !req.query.apiKey) return next();
 
-mongoose.connect(MONGODB_URL)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch(err => console.error("MongoDB connection error:", err));
+  const credentials = await Cart.Auth.findOne({ cartId: req.query.cartId }).exec();
 
-
-// Define a schema
-const Schema = mongoose.Schema;
-const cartSchema = new Schema({
-  cartNum: String,
-  airport: String,
-  battery: Number,
-  status: String,
-  location: String,
-  timeRem: Number,
-  cartId: String
-});
-
-const airportSchema = new Schema({
-  location: String,
-  airportCode: String,
-  numberOfCarts: Number
-});
-
-const taskSchema = new Schema({
-  taskID: String,
-  airport: String,
-  airportLoc: String,     //Destination
-  startPoint: String,
-  CartNum: String,
-  taskTime: String,
-  //2 new perameters for tablet
-  customer: String,
-  ticket: String,
-  status: String    //Enum possibly
-})
-
-// Define a user schema
-const UserSchema = new mongoose.Schema({
-  username: String,
-  password: String,
-  role: { type: String, enum: ['admin', 'user'], default: 'user' },
-  apiKeys: [String],
-});
-
-// Compile the model
-const Cart = mongoose.model('carts', cartSchema);
-const Airport = mongoose.model('airports', airportSchema);
-const Task = mongoose.model('tasks', taskSchema);
-const User = mongoose.model('users', UserSchema);
-
-//---Queries for getting from Database---
-app.get('/api/airports', async (req, res) => {
-  try {
-    const allAirports = await Airport.find({});
-    res.send(allAirports);
-    console.log('Airports retrieved');
-  } catch (error) {
-      console.error("Error during aggregation:", error);
-      res.status(500).send({ error: "Internal Server Error" });
+  if(!credentials || !(await bcrypt.compare(req.query.apiKey, credentials.apiKey))) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
-});
 
-app.get('/api/carts', async (req, res) => {
-  try {
-    console.log('Airport:', req.query.airportCode);
-    const allCarts = await Cart.find({airport: req.query.airportCode}); //TODO: Query by cartID using substring
-    res.send(allCarts);
-    console.log('Carts retrieved');
-  } catch (error) {
-      console.error("Error during aggregation:", error);
-      res.status(500).send({ error: "Internal Server Error" });
+  const cart = await Cart.Meta.findOne({cartId: credentials.cartId}).exec();
+
+  if(!cart) {
+    console.error("apiKeyMiddleware: cart has credentials but there's no cart associated with it.");
+    return res.status(500).json({ message: "Internal Server Error" });
   }
-});
 
-app.get('/api/cart', async (req, res) => {
-  try {
-    console.log('CartId:', req.query.cartId);
-    const getCart = await Cart.find({cartId: req.query.cartId} || {});
-    res.send(getCart[0]);
-    console.log('Carts retrieved');
-  } catch (error) {
-      console.error("Error during aggregation:", error);
-      res.status(500).send({ error: "Internal Server Error" });
+  req.cart = true;
+  Object.assign(req.query, cart);
+
+  return next();
+}
+
+async function authMiddleware(req, res, next) {
+    if(req.cart) return next(); // if a valid apiKey has been provided, skip authentication
+    const token = req.query.accessToken || req.cookies.accessToken; // Access token expires after 15mins, so it's ok to pass as query parameter
+
+    if (!token) return res.status(401).json({ message: 'Access denied' });
+
+    try {
+        const verified = jwt.verify(token, process.env.ACCESS_SECRET, {ignoreExpiration: false});
+
+        const user = await User.findOne({username: verified.username}).exec();
+        if(!user) {
+          return res.status(401).json({ message: "User does not exist." })
+        }
+
+        req.user = user;
+    } catch (err) {
+        console.error("Error when running authMiddleware:", err);
+        return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+
+    return next();
+}
+
+function adminMiddleware(req, res, next) {
+  // Assumes authMiddleware ran before it
+  if(req.cart || req.user.role !== "admin") {
+    return res.status(403).json({ message: "This resource restricted to admin users only." })
   }
-});
 
-// app.get('/api/apikey', async (req, res) => {
-//   apiKey = 123456;
-//   if (req.query.apiKey == apiKey) {
-//     res.send({message: "API Key is valid"});
-//   }
-//   else {
-//     res.send({message: "API Key is invalid"});
-//   }
-// });
+  return next();
+}
 
+// Checks req.query for required strings
+function queryStringsMiddleware(requiredStrings) {
+  return (req, res, next) => {
+    for(let i = 0; i < requiredStrings.length; i++) {
+      if(!req.query[requiredStrings[i]]) return res.status(400).send(requiredStrings[i]+" query string is missing");
+    }
 
-app.get('/api/taskFind', async (req, res) => {
-  try {
-    console.log('Searching for task with CartId:', req.query.cartId);
-    const cartTasks = await Task.find({taskID: req.query.cartId});
-    console.log(cartTasks)
-    res.send(cartTasks);
-    console.log('Tasks retrieved');
-  } catch (error) {
-      console.error("Error during aggregation:", error);
-      res.status(500).send({ error: "Internal Server Error" });
-  }
-});
+    return next();
+  };
+}
 
-app.get('/api/allUsers', async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.send(users);
-    console.log('Users retrieved');
-  } catch (error) {
-      console.error("Error during aggregation:", error);
-      res.status(500).send({ error: "Internal Server Error" });
-  }
-});
+// Checks req.body for required properties
+function requestBodyMiddleware(requiredKeys) {
+  return (req, res, next) => {
+    for(let i = 0; i < requiredKeys.length; i++) {
+      if(!req.body[requiredKeys[i]]) return res.status(400).send(requiredKeys[i]+" property is missing");
+    }
 
-app.get('/api/allCarts', async (req, res) => {
-  try {
-    const carts = await Cart.find({});
-    res.send(carts);
-    console.log('All carts retrieved');
-  } catch (error) {
-      console.error("Error during aggregation:", error);
-      res.status(500).send({ error: "Internal Server Error" });
-  }
-});
+    return next();
+  };
+}
 
-//---Queries for posting to Database---
-app.post('/api/tasks', authMiddleware, adminMiddleware, async (req, res) => {
-  console.log('Task:', req.body);
-  try {
-      const task = new Task({
-          taskID: req.body.taskID,
-          airport: req.body.airport,
-          airportLoc: req.body.airportLoc,
-          startPoint: req.body.startPoint,
-          CartNum: req.body.CartNum,
-          taskTime: req.body.taskTime,
-          status: req.body.status,
-          customer: req.body.customer,
-          ticket: req.body.ticket
-
-      });
-
-      const savedTask = await task.save();
-      console.log("Created Task: ", savedTask);
-
-      res.status(201).json({ message: "Task created successfully", task: savedTask });
-  } catch (error) {
-      console.error("Error posting to database: ", error);
-      res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-app.post('/api/createLocation', authMiddleware, adminMiddleware, async (req,res) => {
-  console.log('Location: ', req.body);
-  try{
-    const location = new Airport({
-      location: req.body.location,
-      airportCode: req.body.AP_Code,
-      numberOfCarts: 0
-    });
-
-    const savedLoc = await location.save()
-    console.log("Created Location: ", savedLoc);
-  }catch(error){
-    console.error("Error posting to database:", error);
-    res.status(500).json({error: "Internal Server Error"});
-  }
-});
-
-app.post('/api/createCart', authMiddleware, adminMiddleware, async (req,res) => {
-  console.log('Creating Cart at', req.body.airportCode, req.body.location);
-  try{
-
-    const allCarts = await Cart.find({airport: req.body.airportCode});
-    const nextCartNum = (allCarts.length)+1;
-
-    const cartID = (req.body.airportCode + nextCartNum);
-    
-    const cart = new Cart({
-      cartNum: nextCartNum,
-      airport: req.body.airportCode,
-      battery: 100,
-      status: "Idle",
-      location: req.body.location,
-      timeRem: 0, 
-      cartId: cartID
-    });
-
-    const savedCart = await cart.save()
-    console.log("Created Cart: ", savedCart);
-  }catch(error){
-    console.error("Error posting to database:", error);
-    res.status(500).json({error: "Internal Server Error"});
-  }
-});
-
-app.post('/register', async (req, res) => {
-  try {
-    const { username, password, role } = req.body;
-
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashedPassword, role });
-
-    await user.save();
-
-    // Generate Tokens (no longer needed when creating new user)
-    //const accessToken = jwt.sign({ userId: user._id, role: user.role }, "access_secret", { expiresIn: "15m" });
-    //const refreshToken = jwt.sign({ userId: user._id }, "refresh_secret", { expiresIn: "7d" });
-
-    // Store refresh token in HTTP-only cookie
-    // res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "Strict" });
-    // res.cookie("accessToken", accessToken, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === "production",
-    //   sameSite: "Strict"
-    // });
-
-    res.json({});
-  } catch (error) {
-    res.status(500).json({ error: "Registration failed" });
-  }
-});
-
-
-
-app.post('/login', async (req, res) => {
+//// Routes
+////// Auth
+app.post('/api/auth/login', requestBodyMiddleware(["username", "password"]), async (req, res) => {
   const { username, password } = req.body;
-  console.log('Login:', req.body);
 
   try {
       const user = await User.findOne({ username });
-      if (!user || !(await bcrypt.compare(password, user.password))) {
+      if (!user || !(await bcrypt.compare(password, user.password))) { // FIXME: await highlighted as unnecessary, although correct
           return res.status(401).json({ message: 'Invalid credentials' });
       }
 
-      // Generate Tokens
-      console.log(user);
+      // Short-lived access token stored in memory for authenticating with the API
       const accessToken = jwt.sign(
-          { userId: user._id, role: user.role },
-          process.env.ACCESS_SECRET || "access_secret",
-          { expiresIn: "15m" } // Short expiry
-      );
-
-      const refreshToken = jwt.sign(
-          { userId: user._id },
-          process.env.REFRESH_SECRET || "refresh_secret",
-          { expiresIn: "7d" } // Longer expiry
-      );
-
-      // Store Refresh Token in HTTP-only Cookie
-      res.cookie("refreshToken", refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "Lax",
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
-      res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict"
-    });
-
-      res.json({ accessToken });
-
-  } catch (error) {
-      console.error("Login Error:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-  }
-});
-
-app.post('/refresh-token', (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-  if (!refreshToken) return res.status(401).json({ message: "No refresh token" });
-
-  try {
-      const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET || "refresh_secret");
-
-      // Generate new access token
-      const accessToken = jwt.sign(
-          { userId: decoded.userId, role: decoded.role },
-          process.env.ACCESS_SECRET || "access_secret",
+          { username: user.username },
+          process.env.ACCESS_SECRET,
           { expiresIn: "15m" }
       );
 
-      res.json({ accessToken });
+      // Long-lived refresh token stored on disk for generating new access tokens
+      const refreshToken = jwt.sign(
+          { username: user.username },
+          process.env.REFRESH_SECRET,
+          { expiresIn: "7d" }
+      );
+
+      // Store the tokens on the client in a browser cookie
+      res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: false, // TODO: Check if SSL is enabled instead
+          sameSite: "Lax",
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+          path: "/api/auth/refresh-token"
+      });
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: false, // TODO: Check if SSL is enabled instead
+        sameSite: "Strict"
+      });
+
+      return res.status(200).json({ accessToken });
 
   } catch (error) {
-      return res.status(403).json({ message: "Invalid refresh token" });
+      console.error("Login Error:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-app.post('/logout', (req, res) => {
+app.post('/api/auth/refresh-token', (req, res) => {
+  const refreshToken = req.cookies.refreshToken || req.body.refreshToken; // DO NOT PASS refreshToken AS QUERY PARAMETER!!!
+
+  if (!refreshToken) return res.status(401).json({ message: "No refresh token" });
+
+  try {
+      const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET, {ignoreExpiration: false})
+
+      // Generate new access token
+      const accessToken = jwt.sign(
+          { username: decoded.username },
+          process.env.ACCESS_SECRET,
+          { expiresIn: "15m" }
+      );
+
+      // Update the cookie
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: false, // TODO: Check if SSL is enabled instead
+        sameSite: "Strict"
+      });
+
+      return res.status(200).json({ accessToken });
+
+  } catch (error) {
+      return res.status(401).json({ message: "Invalid refresh token" });
+  }
+});
+
+app.post('/api/auth/logout', (req, res) => {
   // Clear the cookies
+
   res.clearCookie("refreshToken", { httpOnly: true, sameSite: "Strict" });
   res.clearCookie("accessToken", { httpOnly: true, sameSite: "Strict" });
 
   // Send a response to confirm the user has been logged out
-  res.json({ message: "Logged out successfully" });
+  return res.status(200).json({ message: "Logged out successfully" });
 });
 
+// vvv Potential DDOS/Bruteforce vector vvv
+app.get("/api/auth/check-auth", authMiddleware, (req, res) => {
+  // Dummy endpoint to check if user is authenticated
 
-app.post('/generate-api-key', authMiddleware, adminMiddleware, async (req, res) => {
-  const apiKey = randomBytes(32).toString('hex');
-  await User.findByIdAndUpdate(req.user.userId, { $push: { apiKeys: apiKey } });
-  res.json({ apiKey });
+  return res.status(200).json({ message: "user authenticated" })
 });
 
-app.get('/protected', authMiddleware, (req, res) => {
-  res.json({ message: 'You have access' });
+app.get("/api/auth/check-admin", authMiddleware, adminMiddleware, (req, res) => {
+  // Dummy endpoint to check if user is admin
+
+  return res.status(200).json({ message: "admin permissions available" })
 });
 
-app.use((req, res, next) => {
-  console.log("Headers:", req.headers);
-  console.log("Body:", req.body);
-  console.log("Cookies:", req.cookies);
-  next();
-});
+app.get("/api/auth/check-api-key", apiKeyMiddleware, (req, res) => {
+  // Dummy endpoint to check if api key is valid
 
-app.get('/check-auth', (req, res) => {
-  const token = req.cookies.accessToken || req.headers['authorization']?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'Not authenticated' });
+  return res.status(200).json({ message: "Api key is valid." });
+})
 
+
+////// Airports
+app.get('/api/airports', authMiddleware, async (req, res) => {
   try {
-      const decoded = jwt.verify(token, 'access_secret');
-      console.log("Decoded token:", decoded);  // Log the decoded token to check its contents
-      req.user = decoded; // Store the decoded token in req.user
-
-
-      if (req.user.role !== 'admin') {
-          return res.status(403).json({ message: 'Forbidden: Admins only' });
-      }
-
-      res.json({ role: req.user.role });
-  } catch (err) {
-      console.error("Token verification failed:", err);
-      res.status(403).json({ message: 'Invalid token' });
+    const airports = await Airport.Meta.find({});
+    res.send(airports);
+    // console.log('Airports retrieved');
+  } catch (error) {
+      console.error("Error during /api/airports request:", error);
+      res.status(500).send({ error: "Internal Server Error" });
   }
 });
 
-//---Queries for deleting from Database---
-app.delete('/api/deleteUser/:username', async(req, res) => {
-  console.log('Deleting User')
+app.get('/api/airport', authMiddleware, queryStringsMiddleware(["airportCode"]), async (req, res) => {
+  try {
+    const airport = await Airport.Meta.findOne({airportCode: req.query.airportCode}).exec();
+
+    if(!airport) {
+      return res.status(404).json({ message: "There is no airport with that airportCode" })
+    }
+
+    // console.log('Airports retrieved');
+    return res.send(airport);
+  } catch (error) {
+      console.error("Error during /api/airports request:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+app.post('/api/airport', authMiddleware, adminMiddleware, requestBodyMiddleware(["airportCode", "name", "location"]), async (req,res) => {
+  // console.log('Location: ', req.body);
   try{
-    console.log(req.params.username)
-    const usernameToDel = req.params.username;
-    const result = await User.deleteOne({username: usernameToDel});
+    if(await Airport.Meta.findOne({airportCode: req.body.airportCode}).exec()) {
+      return res.status(409).json({ message: "Airport already exists!" })
+    }
+
+    await Airport.Meta.create({
+      airportCode: req.body.airportCode,
+      name: req.body.name,
+      location: req.body.location
+    });
+
+    // console.log("Created Location: ", savedLoc);
+    return res.status(201).json({ message: "Airport created successfully." });
+  }catch(error){
+    console.error("Error posting to database:", error);
+    res.status(500).json({error: "Internal Server Error"});
+  }
+});
+
+app.delete('/api/airport', authMiddleware, adminMiddleware, queryStringsMiddleware(["airportCode"]), async(req, res) => {
+  try{
+    const result = await Airport.Meta.deleteOne({airportCode: req.query.airportCode}).exec();
+
+    if(result.deletedCount === 0){
+      return res.status(404).json({ message: "Airport not found." });
+    }
+
+    await Airport.Destination.deleteMany({airportCode: req.query.airportCode});
+
+    const carts = await Cart.Meta.find({ airportCode: req.query.airportCode });
+
+    if(carts.length > 0) {
+      const cartIds = carts.map(cart => cart.cartId || null).filter(cartId => cartId);
+
+      await Cart.Meta.deleteMany({ cartId: { $in: cartIds } }).exec();
+      await Cart.Status.deleteMany({ cartId: { $in: cartIds } }).exec();
+      await Cart.Task.deleteMany({ cartId: { $in: cartIds } }).exec();
+      await Cart.Auth.deleteMany({ cartId: { $in: cartIds } }).exec();
+    }
+
+
+    return res.status(204).json({ message:"Airport succesfully deleted." });
+  } catch (err) {
+    console.error("Error during /api/airport/ DELETE request:", err);
+    res.status(500).json({message: "Internal Server Error"});
+  }
+})
+
+app.get('/api/airport/destinations', apiKeyMiddleware, authMiddleware, async (req, res) => {
+  try {
+    const airportDestinations = await Airport.Destination.find(req.query.airportCode ? {airportCode: req.query.airportCode} : {});
+    res.send(airportDestinations);
+    // console.log('Airports retrieved');
+  } catch (error) {
+      console.error("Error during /api/airports request:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+app.get('/api/airport/destination', apiKeyMiddleware, authMiddleware, queryStringsMiddleware(["destinationId"]), async (req, res) => {
+  try {
+    const destination = await Airport.Destination.findOne({destinationId: req.query.destinationId}).exec();
+
+    if(!destination) {
+      return res.status(404).json({ message: "There is no destination with that destinationId" })
+    }
+
+    // console.log('Airports retrieved');
+    return res.send(destination);
+  } catch (error) {
+      console.error("Error during /api/airport/destination GET request:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+app.post('/api/airport/destination', authMiddleware, adminMiddleware, requestBodyMiddleware(["destinationId", "airportCode", "name", "type", "location", "zone"]), async (req,res) => {
+  // console.log('Location: ', req.body);
+  try{
+    if(await Airport.Destination.findOne({destinationId: req.body.destinationId}).exec()) {
+      return res.status(409).json({ message: "Destination already exists!" })
+    }
+
+    await Airport.Destination.create({
+      destinationId: req.body.destinationId,
+      airportCode: req.body.airportCode,
+      name: req.body.name,
+      type: req.body.type,
+      location: JSON.parse(req.body.location), // FIXME: JS Injection?
+      zone: JSON.parse(req.body.zone), // FIXME: JS Injection?
+    });
+
+    // console.log("Created Location: ", savedLoc);
+    return res.status(201).json({ message: "Destination created successfully." });
+  }catch(error){
+    console.error("Error during /api/airport/destination POST request:", error);
+    res.status(500).json({error: "Internal Server Error"});
+  }
+});
+
+app.delete('/api/airport/destination', authMiddleware, adminMiddleware, queryStringsMiddleware(["destinationId"]), async(req, res) => {
+  try{
+    const result = await Airport.Destination.deleteOne({destinationId: req.query.destinationId}).exec();
+
+    if(result.deletedCount === 0){
+      return res.status(404).json({ message: "Destination not found." });
+    }
+
+
+    return res.status(204).json({ message:"Destination succesfully deleted." });
+  } catch (err) {
+    console.error("Error during /api/airport/destination DELETE request:", err);
+    res.status(500).json({message: "Internal Server Error"});
+  }
+})
+
+
+////// Carts
+app.get('/api/carts', authMiddleware, async (req, res) => {
+  try {
+    // console.log('Airport:', req.query.airportCode);
+    const carts = await Cart.Meta.find(req.query.airportCode ? {airportCode: req.query.airportCode} : {});
+    res.send(carts);
+    // console.log('Carts retrieved');
+  } catch (error) {
+      console.error("Error during /api/carts request:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+app.get('/api/cart', authMiddleware, queryStringsMiddleware(["cartId"]), async (req, res) => {
+  try {
+    // console.log('CartId:', req.query.cartId);
+    const cart = await Cart.Meta.findOne({cartId: req.query.cartId});
+
+    if(!cart) {
+      return res.status(404).json({ message: "There is no cart with that cartId" })
+    }
+
+    res.send(cart);
+    // console.log('Carts retrieved');
+  } catch (error) {
+      console.error("Error during /api/cart request:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+app.post('/api/cart', authMiddleware, adminMiddleware, requestBodyMiddleware(["airportCode", "name"]), async (req,res) => {
+  // console.log('Cart: ', req.body);
+  try{
+    const cartId = req.body.airportCode + req.body.name;
+
+    if(await Cart.Meta.exists({cartId: cartId}).exec()) return res.status(400).send("Cart already exists.");
+
+    const apiKey = crypto.randomBytes(32).toString('hex');
+
+    Cart.Meta.create({
+      cartId: cartId,
+      name: req.body.name,
+      airportCode: req.body.airportCode
+    });
+
+    Cart.Status.create({
+      cartId: cartId,
+      battery: -1,
+      status: "Offline",
+      position: [null,null],
+      destinationId: null
+    });
+
+    Cart.Auth.create({
+      cartId: cartId,
+      apiKey: await bcrypt.hash(apiKey, 10),
+    })
+
+    // console.log("Created Location: ", savedCart);
+    return res.status(201).json({ message: "Cart created successfully.", apiKey: apiKey });
+  }catch(error){
+    console.error("Error during '/api/cart' POST request:", error);
+    return res.status(500).json({error: "Internal Server Error"});
+  }
+});
+
+app.delete('/api/cart', authMiddleware, adminMiddleware, queryStringsMiddleware(["cartId"]), async(req, res) => {
+  // console.log('Deleting Cart')
+  try{
+    // console.log(req.params.cartId)
+    const result = await Cart.Meta.deleteOne({cartId: req.query.cartId}).exec();
+
+    if(result.deletedCount === 0){
+      return res.status(404).json({ message: "Cart not found." });
+    }
+
+    await Cart.Status.deleteOne({cartId: req.query.cartId});
+    await Cart.Task.deleteMany({ cartId: req.query.cartId });
+    await Cart.Auth.deleteOne({ cartId: req.query.cartId });
+
+    return res.status(204).json({ message:"Cart succesfully deleted." });
+  } catch (err) {
+    console.error("Error during /api/cart/ DELETE request:", err);
+    res.status(500).json({message: "Internal Server Error"});
+  }
+})
+
+app.get('/api/cart/status', apiKeyMiddleware, authMiddleware, queryStringsMiddleware(["cartId"]), async (req, res) => {
+  try {
+    // console.log('CartId:', req.query.cartId);
+    const status = await Cart.Status.findOne({cartId: req.query.cartId});
+
+    if(!status) {
+      return res.status(404).json({ message: "There is no cart with that cartId" })
+    }
+
+    // console.log('Carts retrieved');
+    return res.status(200).send(status);
+  } catch (error) {
+      console.error("Error during /api/cart/status request:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+app.get('/api/cart/map', apiKeyMiddleware, authMiddleware, queryStringsMiddleware(["cartId"]), (req, res) => {
+  if (mapData[req.query.cartId]) {
+      res.json(mapData);
+  } else {
+      res.status(404).json({ error: 'No map data available' });
+  }
+});
+
+app.get('/api/cart/tasks', apiKeyMiddleware, authMiddleware, async (req, res) => {
+  try {
+    // console.log('Searching for task with CartId:', req.query.cartId);
+    const filter = req.query.cartId ? {cartId: req.query.cartId} : {}; // if cart, this query string will be set
+    if(req.cart) filter.status = { $nin: ["Scheduled", "Completed", "Cancelled"] } // Limit TouchUI to only see the current task
+
+    const cartTasks = await Cart.Task.find(filter).exec();
+    // console.log(cartTasks)
+    res.send(cartTasks);
+    // console.log('Tasks retrieved');
+  } catch (error) {
+      console.error("Error during /api/cart/tasks request:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+app.get('/api/cart/task', authMiddleware, queryStringsMiddleware(["taskId"]), async (req, res) => {
+  try {
+    // console.log('Searching for task with CartId:', req.query.cartId);
+    const cartTask = await Cart.Task.findOne({taskId: req.query.taskId}).exec();
+    // console.log(cartTasks)
+    if(!cartTask) {
+      return res.status(404).json({ message: "There is no task with that taskId" })
+    }
+
+    res.send(cartTask);
+    // console.log('Tasks retrieved');
+  } catch (error) {
+      console.error("Error during request:", error);
+      res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+app.post('/api/cart/task', authMiddleware, requestBodyMiddleware(["taskId", "cartId", "customerName", "ticketNumber", "startPointId", "destinationId", "scheduledTime"]), async (req, res) => {
+  // console.log('Task:', req.body);
+  try {
+      await Cart.Task.create({
+        taskId: req.body.taskId,
+        cartId: req.body.cartId,
+        customerName: req.body.customerName,
+        ticketNumber: req.body.ticketNumber,
+        startPointId: req.body.startPointId,
+        destinationId: req.body.destinationId,
+        scheduledTime: new Date(req.body.scheduledTime),
+        status: "Scheduled"
+      });
+
+      // console.log("Created Task: ", savedTask);
+
+      res.status(201).json({ message: "Task created successfully" });
+  } catch (error) {
+      console.error("Error during /api/cart/task POST request", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.delete('/api/cart/task', authMiddleware, queryStringsMiddleware(["taskId"]), async(req, res) => {
+  // console.log('Deleting Cart')
+  try{
+    // console.log(req.params.cartId)
+    const result = await Cart.Task.deleteOne({taskId: req.query.taskId}).exec();
+
+    if(result.deletedCount === 0){
+      return res.status(404).json({ message: "Task not found." });
+    }
+
+    return res.status(204).json({ message:"Task succesfully deleted." });
+  } catch (err) {
+    console.error("Error during /api/cart/task DELETE request:", err);
+    res.status(500).json({message: "Internal Server Error"});
+  }
+})
+
+////// Users
+app.get('/api/users', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const users = await User.find(req.query.role ? {role: req.query.role} : {}).exec();
+    res.send(users);
+    // console.log('Users retrieved');
+  } catch (error) {
+      console.error("Error during /api/users request:", error);
+      return res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+app.get('/api/user', authMiddleware, adminMiddleware, queryStringsMiddleware(["username"]), async (req, res) => {
+  try {
+    const user = await User.findOne({username: req.query.username}).exec();
+
+    if(!user) {
+      return res.status(404).json({ message: "There is no user with that username" })
+    }
+
+    res.send(user);
+    // console.log('Users retrieved');
+  } catch (error) {
+      console.error("Error during /api/users request:", error);
+      return res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+app.post('/api/user', authMiddleware, adminMiddleware, requestBodyMiddleware(["username", "password"]), async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    User.create({ username: username, password: hashedPassword, role: "user" });
+
+    return res.status(201).json({ message: "User created successfully" });
+  } catch (error) {
+    console.error("Error during /api/user DELETE request:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+app.delete('/api/user/', authMiddleware, adminMiddleware, queryStringsMiddleware(["username"]), async(req, res) => {
+  // console.log('Deleting User')
+  try {
+    // console.log(req.params.username)
+    const result = await User.deleteOne({username: req.query.username}).exec();
 
     if(result.deletedCount === 0){
       return res.status(404).json({message: "User not found."});
     }
 
-    res.json({message:"User succesfully deleted."});
-  }catch (err){
-    console.log("User not successfully deleted");
-    res.status(500).json({err});
+    return res.status(204).json({message: "User succesfully deleted."});
+  } catch (err) {
+    console.log("Error during /api/user DELETE request:", err);
+    return res.status(500).send({ error: "Internal Server Error" });
   }
 })
 
-app.delete('/api/deleteCart/:cartId', async(req, res) => {
-  console.log('Deleting Cart')
+app.patch('/api/user/role', authMiddleware, adminMiddleware, queryStringsMiddleware(["username"]), requestBodyMiddleware(["role"]), async(req, res) => {
+  console.log("Updating Role")
   try{
-    console.log(req.params.cartId)
-    const cartToDel = req.params.cartId;
-    const result = await Cart.deleteOne({cartId: cartToDel});
-
-    if(result.deletedCount === 0){
-      return res.status(404).json({message: "User not found."});
-    }
-
-    res.json({message:"User succesfully deleted."});
-  }catch (err){
-    console.log("User not successfully deleted");
-    res.status(500).json({err});
-  }
-})
-
-//---Queries for updating the Database---
-app.patch('/api/toggleAdmin/:username', async(req, res) => {
-  console.log("Toggling Role")
-  try{
-    const user = await User.findOne({username: req.params.username});
+    const user = await User.findOne({username: req.query.username}).exec();
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    user.role = user.role === "admin" ? "user" : "admin";
-    await user.save()
+    user.updateOne({role: req.body.role}).exec();
 
     res.json({message:"Role successfully toggled.", user});
   }catch(err){
-    console.log("Role not successfully toggled.");
-    res.status(500).json({err});
+    console.log("Error during /api/user/role PATCH request: ", err);
+    res.status(500).json({message: "Internal Server Error"});
   }
 })
 
-
-
-// //OccupancyGridMap functions 
-// const server = http.createServer(app);
-// const io = new Server(server);
-
-// // Temp stoarge in memeory 
-// let mapData = null; // Store OccupancyGrid data
-
-// // Connect to ROS
-// const ros = new ROSLIB.Ros({
-//   url: 'ws://localhost:9090' // using local host 9090 since we used that in ros_test.html
+// app.use((req, res, next) => {
+//   console.log("Headers:", req.headers);
+//   console.log("Body:", req.body);
+//   console.log("Cookies:", req.cookies);
+//   next();
 // });
 
-// // To check ros connections
-// ros.on('error', (error) => {
-//   console.error('ROS connection error:', error);
-// });
+//// Swagger
+var swaggerDocument = {};
 
-// ros.on('close', () => {
-//   console.log('ROS connection closed');
-// });
+try {
+  const newSwaggerDocument = YAML.parse(fs.readFileSync("./swagger.yaml").toString());
+  swaggerDocument = newSwaggerDocument;
+} catch(err) {
+  console.error("Error while parsing swagger.yaml:", err);
+}
 
-// // Subscribe to the /luggage_av/map topic where map data is stored
-// const chatter_topic = new ROSLIB.Topic({
-//   ros: ros,
-//   name: '/luggage_av/map',
-//   messageType: 'nav_msgs/msg/OccupancyGrid' // ROS 2 message format
-// });
-
-// // This should also serve as a update function whenever OccupancyGrid message is received.
-// chatter_topic.subscribe((message) => {
-//   console.log('Received map data:', message);
-//   mapData = message; // Store the latest map data
-
-//   // Emit data to clients connected via WebSocket
-//   io.emit('mapData', message);
-// });
-
-// // API to retrieve stored map data
-// app.get('/api/map', (req, res) => {
-//   if (mapData) {
-//       res.json(mapData);
-//   } else {
-//       res.status(404).json({ error: 'No map data available' });
-//   }
-// });
-
-//other stuff for tablet login
-app.use(bodyParser.json()); // Parse incoming JSON request bodies
-app.use(corsTablet); // Allow CORS for all routes, or you can apply it specifically to certain routes like '/tabletLogin'
-
-// Root route
-app.get('/', (req, res) => {
-  res.send('Welcome to the API! Please use the /login endpoint.');
-});
-
-// fetches list of customers and tickets
-const tasksticket = await Task.find({}, "ticket");
-const tickets = tasksticket.map(task => task.ticket);
-
-const taskscustomer = await Task.find({}, "customer");
-const customers = taskscustomer.map(task => task.customer);
-
-//tabletLogin endpoint
-app.post('/tabletLogin', corsTablet, (req, res) => {
-  const { name, ticket } = req.body;
-  // Check if name exists in customers and ticket exists in tickets
-  const isValidCustomer = customers.includes(name);
-  const isValidTicket = tickets.includes(ticket);
-  
-  if (isValidCustomer && isValidTicket) {
-    res.status(200).json({ success: true, message: 'Authentication successful!' });
-  } else {
-    res.status(401).json({ success: false, message: 'Invalid name or ticket' });
+fs.watch("./swagger.yaml", (curr, prev) => {
+  try {
+    const newSwaggerDocument = YAML.parse(fs.readFileSync("./swagger.yaml").toString());
+    swaggerDocument = newSwaggerDocument;
+  } catch(err) {
+    console.error("Error while parsing swagger.yaml:", err);
   }
+})
+
+var options = {
+  swaggerOptions: {
+      url: "/api-docs/swagger.json",
+  }
+}
+
+
+app.get("/api-docs/swagger.json", (req, res) => res.json(swaggerDocument));
+app.use('/api-docs', swaggerUi.serveFiles(null, options), swaggerUi.setup(null, options));
+
+// Socket.io
+const server = http.createServer(app);
+const io = new Server(server);
+
+io.on('connection', (socket) => {
+  console.log('new frontend connected');
 });
 
-//set up the server
+// ROS integration
+var mapData = {luggage_av: null};
+const ros = new ROSLIB.Ros({
+  url: 'ws://localhost:9090' // using localhost 9090 since we used that in ros_test.html
+});
 
-app.listen(PORT_2, () => {
-  console.log('Server started on http://localhost:' + PORT_2);
+ros.on('error', (error) => {
+  console.error('ROS connection error:', error);
+});
+
+ros.on('close', () => {
+  console.log('ROS connection closed');
+});
+
+//// Topics
+const map_topic = new ROSLIB.Topic({
+  ros: ros,
+  name: '/luggage_av/map',
+  messageType: 'nav_msgs/msg/OccupancyGrid' // ROS 2 message format
+});
+
+////// Subscriptions
+map_topic.subscribe((message) => {
+  // This should also serve as a update function whenever OccupancyGrid message is received.
+  // console.log('Received map data:', message);
+  mapData.luggage_av = message; // Store the latest map data
+
+  // Emit data to clients connected via WebSocket
+  io.emit('mapData', message);
+});
+
+// Start server
+server.listen(PORT_2, () => {
+  console.log('Server started on http://0.0.0.0:' + PORT_2);
 });

@@ -16,14 +16,10 @@ function CreateCart(){
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        api.get("/check-auth", { withCredentials: true })
+        api.get("/api/auth/check-admin", { withCredentials: true })
         .then(response => {
             console.log("API Response:", response.data);  // Log response to verify the role
-            if (response.data.role.toLowerCase() !== "admin") {
-                navigate("/locations");
-            } else {
-                setLoading(false);
-            }
+            setLoading(false);
         })
         .catch(error => {
             console.error("Auth Check Failed:", error);  // Log error if check fails
@@ -33,7 +29,7 @@ function CreateCart(){
 
     useEffect(() => {
         axios
-            .get('http://localhost:4000/api/airports')
+            .get('http://localhost:4000/api/airports',{ withCredentials: true })
             .then((response) => {
                 console.log("API Response:", response.data); // Debug API data
                 setAirports(response.data);
