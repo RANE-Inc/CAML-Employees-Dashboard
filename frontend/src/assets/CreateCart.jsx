@@ -12,6 +12,7 @@ function CreateCart(){
     const navigate = useNavigate();
     const [Airports, setAirports] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState('YOW');
+    const [cartName, setCartName] = useState('');
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -53,7 +54,7 @@ function CreateCart(){
                 '/api/cart',
                 {
                     airportCode: selectedLocation,
-                    name: "default",
+                    name: cartName,
                 }
             );
             console.log("API Response: ", response.data);
@@ -89,6 +90,17 @@ function CreateCart(){
                             ))}
                         </select>
                     </div>
+                    
+                    {/* Input Cart Name */}
+                    <label htmlFor='cartName' style={{ fontSize: "150%", paddingTop: '5%' }}>Cart Name</label>
+                        <input
+                            id="cartName"
+                            value={cartName}
+                            onChange={(e) => setCartName(e.target.value)}
+                            className="bg-amber-200 p-2"
+                            type="text"
+                            placeholder="Enter Cart Name"
+                        />
 
                     {/* Confirm Button */}
                     <div style={{ paddingTop: '8%' }}>
