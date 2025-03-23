@@ -9,6 +9,7 @@ import { randomBytes } from 'crypto';
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import { Server } from 'socket.io';
+import schedule from 'node-schedule';
 
 // Swagger
 import swaggerUi from 'swagger-ui-express';
@@ -80,7 +81,7 @@ const cartSchemas = {
     startPointId: String,
     destinationId: String,
     scheduledTime: Date,
-    status: {type: String, enum: ["Scheduled", "Waiting", "In Progress", "Completed", "On detour", "Cancelled"]}
+    status: {type: String, enum: ["Scheduled", "Waiting", "In Progress", "Completed", "On detour", "Cancelled", "Missed"]}
   }),
   auth: new mongoose.Schema({
     cartId: String,
@@ -371,8 +372,16 @@ app.delete('/api/airport', authMiddleware, adminMiddleware, queryStringsMiddlewa
 
       await Cart.Meta.deleteMany({ cartId: { $in: cartIds } }).exec();
       await Cart.Status.deleteMany({ cartId: { $in: cartIds } }).exec();
-      await Cart.Task.deleteMany({ cartId: { $in: cartIds } }).exec();
       await Cart.Auth.deleteMany({ cartId: { $in: cartIds } }).exec();
+
+      const tasks = await Cart.Task.find({ cartId: { $in: cartIds } }).exec();
+
+      for(let i = 0; i < tasks.length; i++) {
+        jobs[tasks[i].taskId].cancel();
+        delete jobs[tasks[i].taskId];
+      }
+
+      await Cart.Task.deleteMany({ cartId: { $in: cartIds } }).exec();
     }
 
 
@@ -442,6 +451,15 @@ app.delete('/api/airport/destination', authMiddleware, adminMiddleware, queryStr
       return res.status(404).json({ message: "Destination not found." });
     }
 
+    // Delete all tasks that started or led to destinationId
+    const tasks = await Cart.Task.find({ $or: [{ startPointId: req.query.destinationId }, { destinationId: req.query.destinationId }] }).exec();
+
+      for(let i = 0; i < tasks.length; i++) {
+        jobs[tasks[i].taskId].cancel();
+        delete jobs[tasks[i].taskId];
+      }
+
+    await Cart.Task.deleteMany({ destinationId: req.query.destinationId }).exec();
 
     return res.status(204).json({ message:"Destination succesfully deleted." });
   } catch (err) {
@@ -528,8 +546,16 @@ app.delete('/api/cart', authMiddleware, adminMiddleware, queryStringsMiddleware(
     }
 
     await Cart.Status.deleteOne({cartId: req.query.cartId});
-    await Cart.Task.deleteMany({ cartId: req.query.cartId });
     await Cart.Auth.deleteOne({ cartId: req.query.cartId });
+
+    const tasks = await Cart.Task.find({ cartId: req.query.cartId }).exec();
+
+    for(let i = 0; i < tasks.length; i++) {
+      jobs[tasks[i].taskId].cancel();
+      delete jobs[tasks[i].taskId];
+    }
+
+    await Cart.Task.deleteMany({ cartId: req.query.cartId });
 
     return res.status(204).json({ message:"Cart succesfully deleted." });
   } catch (err) {
@@ -599,23 +625,32 @@ app.get('/api/cart/task', authMiddleware, queryStringsMiddleware(["taskId"]), as
 app.post('/api/cart/task', authMiddleware, requestBodyMiddleware(["taskId", "cartId", "customerName", "ticketNumber", "startPointId", "destinationId", "scheduledTime"]), async (req, res) => {
   // console.log('Task:', req.body);
   try {
-      await Cart.Task.create({
-        taskId: req.body.taskId,
-        cartId: req.body.cartId,
-        customerName: req.body.customerName,
-        ticketNumber: req.body.ticketNumber,
-        startPointId: req.body.startPointId,
-        destinationId: req.body.destinationId,
-        scheduledTime: new Date(req.body.scheduledTime),
-        status: "Scheduled"
-      });
 
-      // console.log("Created Task: ", savedTask);
+    if(await Cart.Task.exists({taskId: req.body.taskId}).exec()) return res.status(400).send("Task already exists.");
 
-      res.status(201).json({ message: "Task created successfully" });
+    const scheduledTime = new Date(req.body.scheduledTime);
+
+    // TODO: Check for scheduling conflicts
+
+    const task = await Cart.Task.create({
+      taskId: req.body.taskId,
+      cartId: req.body.cartId,
+      customerName: req.body.customerName,
+      ticketNumber: req.body.ticketNumber,
+      startPointId: req.body.startPointId,
+      destinationId: req.body.destinationId,
+      scheduledTime: scheduledTime,
+      status: "Scheduled"
+    });
+
+    // console.log("Created Task: ", savedTask);
+
+    jobs[req.body.taskId] = schedule.scheduleJob(scheduledTime, scheduleCallback.bind(null, task));
+
+    res.status(201).json({ message: "Task created successfully" });
   } catch (error) {
-      console.error("Error during /api/cart/task POST request", error);
-      res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error during /api/cart/task POST request", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -628,6 +663,9 @@ app.delete('/api/cart/task', authMiddleware, queryStringsMiddleware(["taskId"]),
     if(result.deletedCount === 0){
       return res.status(404).json({ message: "Task not found." });
     }
+
+    jobs[req.query.taskId].cancel();
+    delete jobs[req.query.taskId];
 
     return res.status(204).json({ message:"Task succesfully deleted." });
   } catch (err) {
@@ -786,6 +824,28 @@ map_topic.subscribe((message) => {
   // Emit data to clients connected via WebSocket
   io.emit('mapData', message);
 });
+
+// Task Scheduling
+const tasks = await Cart.Task.find({ status: "Scheduled" }).exec();
+const jobs = {};
+
+function scheduleCallback(task) {
+  // TODO: ROS integration
+  console.log("Starting Task", task.taskId, "for cart", task.cartId);
+}
+
+for(let i = 0; i < tasks; i++) {
+  let now = new Date();
+
+  // Skip tasks that has been scheduled more than 5mins ago, when the system was down
+  if(now - tasks[i].scheduledTime > 5 * 60 * 1000) {
+    await Cart.Task.updateOne({ taskId: tasks[i].taskId }, { status: "Missed" }); // TODO: notify user
+
+    continue;
+  }
+
+  jobs[tasks[i].taskId] = schedule.scheduleJob(tasks[i].scheduledTime, scheduleCallback.bind(null, tasks[i]));
+}
 
 // Start server
 server.listen(PORT_2, () => {
