@@ -93,7 +93,7 @@ function CameraStream(props) {
     // FIXME: Styling
     // FIXME: Add CSS rule to set display: none on the spinner class when camera-stream has the class "streaming"
     return(
-        <div id="camera-stream" style={{backgroundColor: "black", width: "600px", height: "450px", position:'absolute', bottom:'45%', left:'65%'}}>
+        <div id="camera-stream" style={{backgroundColor: "black", width: "600px", height: "450px", position:'absolute', bottom:'39%', left:'65%'}}>
             <div id="spinner">
                 <span style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", color: "white"}}>Camera stream currently unavailable.</span>
             </div>
@@ -157,12 +157,20 @@ function Cart(){
 
         <div>
             <DropMyMenu/>
-
+            <b style={{ position: "absolute", color:"SaddleBrown", top: "2%", left: "45%", fontSize: '250%' }}>
+                {cart.cartId} Homepage
+            </b>
+            
+            
             <OccupancyGridMap/>
 
+            <b style={{ position: "absolute", color:"SaddleBrown", top:'8%', left:'76%', fontSize: '200%' }}>
+                Live Camera
+            </b>
+            <CameraStream cartId={cartId}/>
+
             <div className="flex gap-4">
-                <CameraStream cartId={cartId}/>
-                <Card className="bg-amber-400" style={{fontFamily:'Kanit', position:"absolute", top:"25%", left:'16%'}}>
+                <Card className="bg-amber-400 w-[300px]" style={{fontFamily:'Kanit', position:"absolute", top:"25%", left:'16%'}}>
                     <CardTitle style={{paddingTop:'3%', fontSize:'225%'}}>
                         Cart { cart.name }
                     </CardTitle>
@@ -176,7 +184,7 @@ function Cart(){
                         Status: {cartStatus.status}
                     </CardContent>
                     <CardContent className='text-left' style={{fontSize:'150%'}}>
-                        Destination: { cartStatus.destination }
+                        Destination: {cartStatus.destination ?? "N/A"}
                     </CardContent>
                     <div style={{paddingTop:'10%', paddingBottom:'5%'}}>
                         <Button style={{fontSize:'150%', color:"white"}} variant="secondary"  className="bg-amber-600">
@@ -186,10 +194,14 @@ function Cart(){
                         </Button>
                     </div>
                 </Card>
+                
+                <b style={{ position: "absolute", color:"SaddleBrown", top: "16%", left: "46%", fontSize: '200%' }}>
+                    Tasks
+                </b>
                 <div
                     style={{
                         position: "absolute",
-                        top: "25%",
+                        top: "20%",
                         left: "38%",
                         maxHeight: "500px",
                         overflowY: "scroll",
@@ -197,6 +209,8 @@ function Cart(){
                     }}
                     className="grid p-5 grid-cols-1 w-[420px]"
                 >
+
+            
                     {error ? (
                         <p>{error}</p>
                     ) : tasks && tasks.length > 0 ? (

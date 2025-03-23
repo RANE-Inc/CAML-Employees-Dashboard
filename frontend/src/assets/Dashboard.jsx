@@ -51,21 +51,21 @@ function Dashboard() {
                     overflowX: "hidden",
                     maxHeight: "calc(100vh - 10%)",
                 }}
-                className="grid gap-12 p-4 sm:grid-cols-2 md:grid-cols-3 w-[1200px]"
+                className="grid gap-12 p-4 sm:grid-cols-2 md:grid-cols-3 w-[1200px] h-[75%]"
             >
                 {error ? (
                     <p>{error}</p>
                 ) : luggageCarts && luggageCarts.length > 0 ? (
                     luggageCarts.map((cart) => (
                         <div key={cart.cartId} className="max-w-xs text-left">
-                            <Card className="bg-amber-400 h-[160px] w-[360px]">
+                            <Card className="bg-amber-400 h-[140px] w-[360px]">
                                 <CardTitle style={{ paddingLeft: "7%", paddingTop: "3%", fontSize: "160%" }}>
                                     Cart {cart.name}
                                 </CardTitle>
                                 <CardContent style={{ paddingTop: "3%", paddingBottom: "1%", fontSize: "110%" }}>
                                     Cart ID: {cart.cartId}
                                 </CardContent>
-                                <div style={{ paddingLeft: '6%', marginTop: '8%' }}>
+                                <div style={{ paddingLeft: '6%', marginTop: '2%' }}>
                                     <Button
                                         style={{ fontSize: '100%' }}
                                         variant="secondary"

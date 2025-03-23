@@ -16,6 +16,7 @@ function CreateLocation(){
     const [state, setState] = useState('');
     const [country, setCountry] = useState('');
     const [airportCode, setAirportCode] = useState('');
+    const [AP_name, setAP_name] = useState('');
 
     useEffect(() => {
         api.get("/api/auth/check-admin", { withCredentials: true })
@@ -30,8 +31,6 @@ function CreateLocation(){
     }, [navigate]);
 
     const handleSubmit = async () => {
-
-        alert(((city) + ', ' + (state) + ', ' + (country)));
 
         try{
             const response = await api.post('/api/createAirport',
@@ -53,7 +52,7 @@ function CreateLocation(){
     return(
         <div>
             <DropMyMenu />
-            <div style={{fontFamily:'Kanit', position:"absolute", top:"20%", left:'45%'}}>
+            <div style={{fontFamily:'Kanit', position:"absolute", top:"15%", left:'45%'}}>
                 <div style={{fontSize:"250%", color:"SaddleBrown"}}>
                     Create Location
                 </div>
@@ -92,6 +91,17 @@ function CreateLocation(){
                                 className="bg-amber-200 p-2"
                                 type="text"
                                 placeholder="Enter Country"
+                            />
+
+                        {/* Enter Airport Name */}
+                        <label htmlFor='AP_name'>Airport Name</label>
+                            <input
+                                id="AP_name"
+                                value={AP_name}
+                                onChange={(e) => setAP_name(e.target.value)}
+                                className="bg-amber-200 p-2"
+                                type="text"
+                                placeholder="Enter Airport Name"
                             />
 
                         {/* Enter Airport Code */}

@@ -11,7 +11,6 @@ import {
     TableHeader,
     TableRow,
   } from '../components/ui/table';
-import {ScrollArea} from '../components/ui/scroll-area';
 import axios from 'axios';
 import api from '../api/axiosInstance'; // Import axios instance
 import { useState, useEffect } from 'react';
@@ -102,7 +101,6 @@ function AdminDashboard() {
     }
 
     const removeAirport = async(code) => {
-        alert("To Be Implemented");
         axios
             .delete(`http://localhost:4000/api/airport`,{ params: { airportCode: code }, withCredentials: true })
             .then((response) => {
