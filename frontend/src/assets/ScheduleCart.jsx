@@ -9,8 +9,7 @@ import DropMyMenu from '../components/ui/dropMyMenu';
 function ScheduleCart() {
     const navigate = useNavigate();
     const { cartId } = useParams();
-    const [selectedTime, setSelectedTime] = useState('');
-    const [selectedAMPM, setSelectedAMPM] = useState('');
+    const [dateTime, setDateTime] = useState('');
     const [selectedStart, setSelectedStart] = useState('');
     const [selectedDestination, setSelectedDestination] = useState('');
     const [cart, setCart] = useState({});
@@ -62,7 +61,7 @@ function ScheduleCart() {
                     ticketNumber: ticketNumber,
                     startPointId: selectedStart,
                     destinationId: selectedDestination,
-                    scheduledTime: "2025-03-21T03:25:31.486Z"
+                    scheduledTime: dateTime
                   }
             );
 
@@ -109,29 +108,12 @@ function ScheduleCart() {
                         />
 
                         {/* Select Time */}
-                        <label htmlFor='time'>Select Time</label>
-                        <select
-                            id="time"
-                            value={selectedTime}
-                            onChange={(e) => setSelectedTime(e.target.value)}
-                            className='bg-amber-200'
-                        >
-                            {[...Array(12)].map((_, i) => (
-                                <option key={i + 1} value={`${i + 1}:00`}>{i + 1}:00</option>
-                            ))}
-                        </select>
-
-                        {/* Select AM/PM */}
-                        <label htmlFor='AMPM' style={{ paddingTop: '3%' }}>Select AM or PM</label>
-                        <select
-                            id="AMPM"
-                            value={selectedAMPM}
-                            onChange={(e) => setSelectedAMPM(e.target.value)}
-                            className='bg-amber-200'
-                        >
-                            <option value="AM">AM</option>
-                            <option value="PM">PM</option>
-                        </select>
+                        <label htmlFor='dateAndTime'>Select Date & Time</label>
+                        <input label="Date and time" type="datetime-local" className='bg-amber-200'
+                            id = "dateTime"
+                            value={dateTime}
+                            onChange={(e) => setDateTime(e.target.value)}
+                        />
 
                         {/* Select Start Location */}
                         <label htmlFor='Start' style={{ paddingTop: '3%' }}>Select Start Location</label>
