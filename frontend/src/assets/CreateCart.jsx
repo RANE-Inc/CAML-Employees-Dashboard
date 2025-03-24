@@ -70,9 +70,9 @@ function CreateCart(){
         <div>
             <DropMyMenu />
             <div style={{fontFamily:'Kanit', position:"absolute", top:"20%", left:'45%'}}>
-                <div style={{fontSize:"250%", color:"SaddleBrown"}}>
+                <b style={{fontSize:"250%", color:"SaddleBrown"}}>
                     Create Cart
-                </div>
+                </b>
 
                 <form className="grid grid-cols-1" style={{ paddingTop: '5%' }} onSubmit={handleSubmit}>
                     <div className="grid grid-4" style={{ fontSize: "150%", paddingTop: '5%' }}>

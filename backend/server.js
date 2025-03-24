@@ -319,6 +319,7 @@ app.get('/api/airports', authMiddleware, async (req, res) => {
 });
 
 app.get('/api/airport', authMiddleware, queryStringsMiddleware(["airportCode"]), async (req, res) => {
+  //console.log("Getting airport:", req.query.airportCode);
   try {
     const airport = await Airport.Meta.findOne({airportCode: req.query.airportCode}).exec();
 

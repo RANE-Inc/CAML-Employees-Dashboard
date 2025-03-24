@@ -17,6 +17,7 @@ import { useState, useEffect } from 'react';
 
 function Dashboard() {
     const [luggageCarts, setLuggageCarts] = useState([]);
+    const [airport, setAirport] = useState({});
     const [error, setError] = useState(null);
 
     const { airportCode } = useParams();
@@ -35,11 +36,24 @@ function Dashboard() {
             });
     }, []);
 
+    useEffect(() => {
+        axios
+            .get('http://localhost:4000/api/airport',{params: {airportCode: airportCode} , withCredentials: true })
+            .then((response) => {
+                console.log("API Response:", response.data); // Debug API data
+                setAirport(response.data);
+            })
+            .catch((error) => {
+                console.error("API Error:", error);
+                setError("Failed to fetch airport. Please try again later.");
+            });
+    }, []);
+
     return (
         <div>
             <DropMyMenu />
-            <b style={{ position: "absolute", color:"SaddleBrown", top: "2%", left: "45%", fontSize: '250%' }}>
-                {airportCode} Airport
+            <b className="text-centered" style={{ position: "absolute", color:"SaddleBrown", top: "2%", left: "40%", fontSize: '250%' }}>
+                {airport.name}
             </b>
 
             <div
@@ -51,15 +65,15 @@ function Dashboard() {
                     overflowX: "hidden",
                     maxHeight: "calc(100vh - 10%)",
                 }}
-                className="grid gap-12 p-4 sm:grid-cols-2 md:grid-cols-3 w-[1200px] h-[75%]"
+                className="grid gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 w-[1200px] h-[75%]"
             >
                 {error ? (
                     <p>{error}</p>
                 ) : luggageCarts && luggageCarts.length > 0 ? (
                     luggageCarts.map((cart) => (
                         <div key={cart.cartId} className="max-w-xs text-left">
-                            <Card className="bg-amber-400 h-[140px] w-[360px]">
-                                <CardTitle style={{ paddingLeft: "7%", paddingTop: "3%", fontSize: "160%" }}>
+                            <Card className="bg-amber-400 h-[140px] w-[300px]">
+                                <CardTitle style={{ paddingLeft: "3%", paddingTop: "3%", fontSize: "160%" }}>
                                     Cart {cart.name}
                                 </CardTitle>
                                 <CardContent style={{ paddingTop: "3%", paddingBottom: "1%", fontSize: "110%" }}>

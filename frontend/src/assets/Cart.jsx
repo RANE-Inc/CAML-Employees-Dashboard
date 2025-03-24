@@ -93,7 +93,7 @@ function CameraStream(props) {
     // FIXME: Styling
     // FIXME: Add CSS rule to set display: none on the spinner class when camera-stream has the class "streaming"
     return(
-        <div id="camera-stream" style={{backgroundColor: "black", width: "600px", height: "450px", position:'absolute', bottom:'39%', left:'65%'}}>
+        <div id="camera-stream" style={{backgroundColor: "black", width: "480px", height: "360px", position:'absolute', bottom:'39%', left:'66%'}}>
             <div id="spinner">
                 <span style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", color: "white"}}>Camera stream currently unavailable.</span>
             </div>
@@ -164,13 +164,13 @@ function Cart(){
             
             <OccupancyGridMap/>
 
-            <b style={{ position: "absolute", color:"SaddleBrown", top:'8%', left:'76%', fontSize: '200%' }}>
+            <b style={{ position: "absolute", color:"SaddleBrown", top:'10%', left:'76%', fontSize: '200%' }}>
                 Live Camera
             </b>
             <CameraStream cartId={cartId}/>
 
             <div className="flex gap-4">
-                <Card className="bg-amber-400 w-[300px]" style={{fontFamily:'Kanit', position:"absolute", top:"25%", left:'16%'}}>
+                <Card className="bg-amber-400 w-[300px]" style={{fontFamily:'Kanit', position:"absolute", top:"25%", left:'14%'}}>
                     <CardTitle style={{paddingTop:'3%', fontSize:'225%'}}>
                         Cart { cart.name }
                     </CardTitle>
@@ -202,7 +202,7 @@ function Cart(){
                     style={{
                         position: "absolute",
                         top: "20%",
-                        left: "38%",
+                        left: "36%",
                         maxHeight: "500px",
                         overflowY: "scroll",
                         overflowX:"hidden"
