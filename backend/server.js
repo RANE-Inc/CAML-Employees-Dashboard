@@ -35,6 +35,7 @@ const env = dotenv.config();
 const PORT_2 = process.env.PORT_2 // port number
 const MONGODB_HOST = process.env.MONGODB_HOST // mongodb host
 const MONGODB_PORT = process.env.MONGODB_PORT // mongodb port
+const MISSED_ACCEPT_WINDOW = parseInt(process.env.MISSED_ACCEPT_WINDOW);
 
 
 
@@ -835,17 +836,21 @@ function scheduleCallback(task) {
   console.log("Starting Task", task.taskId, "for cart", task.cartId);
 }
 
-for(let i = 0; i < tasks; i++) {
-  let now = new Date();
+for(let i = 0; i < tasks.length; i++) {
+  const timeAgo = (new Date()) - tasks[i].scheduledTime;
 
   // Skip tasks that has been scheduled more than 5mins ago, when the system was down
-  if(now - tasks[i].scheduledTime > 5 * 60 * 1000) {
+  if(timeAgo > MISSED_ACCEPT_WINDOW * 1000) {
     await Cart.Task.updateOne({ taskId: tasks[i].taskId }, { status: "Missed" }); // TODO: notify user
 
     continue;
   }
-
-  jobs[tasks[i].taskId] = schedule.scheduleJob(tasks[i].scheduledTime, scheduleCallback.bind(null, tasks[i]));
+  else if(0 <= timeAgo && timeAgo < MISSED_ACCEPT_WINDOW * 1000) {
+    scheduleCallback(tasks[i]);
+  }
+  else {
+    jobs[tasks[i].taskId] = schedule.scheduleJob(tasks[i].scheduledTime, scheduleCallback.bind(null, tasks[i]));
+  }
 }
 
 // Start server
