@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 import http from 'http';
 import { Server } from 'socket.io';
 import schedule from 'node-schedule';
+import bodyParser from 'body-parser';
 
 // Swagger
 import swaggerUi from 'swagger-ui-express';
@@ -36,8 +37,6 @@ const PORT_2 = process.env.PORT_2 // port number
 const MONGODB_HOST = process.env.MONGODB_HOST // mongodb host
 const MONGODB_PORT = process.env.MONGODB_PORT // mongodb port
 const MISSED_ACCEPT_WINDOW = parseInt(process.env.MISSED_ACCEPT_WINDOW);
-
-
 
 // Mongo
 mongoose.connect("mongodb://"+MONGODB_HOST+":"+MONGODB_PORT+"/caml")
@@ -111,11 +110,10 @@ const Cart = {
 
 const User = mongoose.model('users', UserSchema);
 
-
-
 // Express
 const app = express();
 app.use(express.json());
+app.use(bodyParser.json()); 
 
 app.use(cors({
   origin: "http://localhost:5173", // Specify frontend URL
@@ -124,6 +122,14 @@ app.use(cors({
   allowedHeaders: "Content-Type,Authorization", // Allowed headers
 }));
 app.use(cookieParser());
+
+// Alternitive cors for tabletLogin
+const corsTablet = cors({
+  origin: "http://localhost:3000", // Frontend (Electron app) URL
+  credentials: true, // Allow cookies or authorization headers
+  methods: "GET, POST", // Allow both GET and POST requests
+  allowedHeaders: "Content-Type,Authorization", // Allow necessary headers
+});
 
 //// Middlewares
 async function apiKeyMiddleware(req, res, next) {
@@ -758,6 +764,28 @@ app.patch('/api/user/role', authMiddleware, adminMiddleware, queryStringsMiddlew
 //   console.log("Cookies:", req.cookies);
 //   next();
 // });
+
+// Endpoint for tabletlogin
+// Fetches the list of customers and tickets
+const tasksticket = await Cart.Task.find({}, "ticketNumber");
+const tickets = tasksticket.map(task => task.ticketNumber);
+
+const taskscustomer = await Cart.Task.find({}, "customerName");
+const customers = taskscustomer.map(task => task.customerName);
+
+app.post('/tabletLogin', corsTablet, (req, res) => {
+  const { name, ticket } = req.body;
+
+  // Check if name exists in customers and ticket exists in tickets
+  const isValidCustomer = customers.includes(name);
+  const isValidTicket = tickets.includes(ticket);
+  
+  if (isValidCustomer && isValidTicket) {
+    res.status(200).json({ success: true, message: 'Authentication successful!' });
+  } else {
+    res.status(401).json({ success: false, message: 'Invalid name or ticket', availableTickets: tickets  });
+  }
+});
 
 //// Swagger
 var swaggerDocument = {};
