@@ -115,8 +115,17 @@ const app = express();
 app.use(express.json());
 app.use(bodyParser.json()); 
 
+
+const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
+
 app.use(cors({
-  origin: "http://localhost:5173", // Specify frontend URL
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {  // Allow no-origin requests (e.g., for Postman or server-side)
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true, // Allow cookies and authentication headers
   methods: "GET,POST,PATCH,PUT,DELETE", // Allowed HTTP methods
   allowedHeaders: "Content-Type,Authorization", // Allowed headers
@@ -765,28 +774,6 @@ app.patch('/api/user/role', authMiddleware, adminMiddleware, queryStringsMiddlew
 //   next();
 // });
 
-// Endpoint for tabletlogin
-// Fetches the list of customers and tickets
-const tasksticket = await Cart.Task.find({}, "ticketNumber");
-const tickets = tasksticket.map(task => task.ticketNumber);
-
-const taskscustomer = await Cart.Task.find({}, "customerName");
-const customers = taskscustomer.map(task => task.customerName);
-
-app.post('/tabletLogin', corsTablet, (req, res) => {
-  const { name, ticket } = req.body;
-
-  // Check if name exists in customers and ticket exists in tickets
-  const isValidCustomer = customers.includes(name);
-  const isValidTicket = tickets.includes(ticket);
-  
-  if (isValidCustomer && isValidTicket) {
-    res.status(200).json({ success: true, message: 'Authentication successful!' });
-  } else {
-    res.status(401).json({ success: false, message: 'Invalid name or ticket', availableTickets: tickets  });
-  }
-});
-
 //// Swagger
 var swaggerDocument = {};
 
@@ -880,6 +867,11 @@ for(let i = 0; i < tasks.length; i++) {
     jobs[tasks[i].taskId] = schedule.scheduleJob(tasks[i].scheduledTime, scheduleCallback.bind(null, tasks[i]));
   }
 }
+
+// Get route message Leon used for testing endpoints 
+app.get('/', (req, res) => {
+  res.send('Welcome to the API! Please use the /login or /tabletLogin endpoint.');
+});
 
 // Start server
 server.listen(PORT_2, () => {
