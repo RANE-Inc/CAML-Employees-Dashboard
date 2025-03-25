@@ -196,7 +196,7 @@ function AdminDashboard() {
                             <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{cart.cartId}</TableCell>
                             <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{cart.airportCode}</TableCell>
                             <TableCell className="text-centered">
-                                <Button onClick={() => (cart.cartID)} style={{fontSize:'70%', color:"white"}} variant="secondary" className="bg-amber-600">
+                                <Button style={{fontSize:'70%', color:"white"}} variant="secondary" className="bg-amber-600">
                                     <Link style={{color:"white"}} to={`/ScheduleCart/${cart.cartId}`}>
                                         Create Task
                                     </Link>
@@ -226,8 +226,8 @@ function AdminDashboard() {
             <Table className="w-[1000px]" style={{fontSize:"175%"}}>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[450px] text-left" style={{color:"Black", fontSize:"115%"}}>Location</TableHead>
-                        <TableHead className="w-[250px]" style={{color:"Black", fontSize:"115%"}}>Airport Code</TableHead>
+                        <TableHead className="w-[400px] text-left" style={{color:"Black", fontSize:"115%"}}>Location</TableHead>
+                        <TableHead className="w-[240px]" style={{color:"Black", fontSize:"115%"}}>Airport Code</TableHead>
                         <TableHead style={{color:"Black", fontSize:"115%"}}>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -237,8 +237,13 @@ function AdminDashboard() {
                             <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{airport.location}</TableCell>
                             <TableCell className="text-left font-medium" style={{color:"SaddleBrown", fontSize:"110%"}}>{airport.airportCode}</TableCell>
                             <TableCell className="text-left">
-                                <Button onClick={() => removeAirport(airport.airportCode)} style={{fontSize:'70%', color:"white", transform:"translateX(1%)"}} variant="secondary" className="bg-red-700">
-                                    Remove Location
+                                <Button style={{fontSize:'70%', color:"white"}} variant="secondary" className="bg-amber-600">
+                                    <Link style={{color:"white"}} to={`/AddDestination/${airport.airportCode}`}>
+                                        Add Destination
+                                    </Link>
+                                </Button>
+                                <Button onClick={() => removeAirport(airport.airportCode)} style={{fontSize:'70%', color:"white", transform:"translateX(5%)"}} variant="secondary" className="bg-red-700">
+                                    Remove
                                 </Button>
                             </TableCell>
                         </TableRow>

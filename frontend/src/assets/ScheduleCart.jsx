@@ -12,6 +12,7 @@ function ScheduleCart() {
     const [dateTime, setDateTime] = useState('');
     const [selectedStart, setSelectedStart] = useState('');
     const [selectedDestination, setSelectedDestination] = useState('');
+    const [destinations, setDestinations] = useState([]);
     const [cart, setCart] = useState({});
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -48,6 +49,19 @@ function ScheduleCart() {
             .finally(() => setLoading(false));
     }, [cartId]);
 
+    // Fetch Airport Destinations
+    useEffect(() => {
+        api.get('/api/airport/destinations', {params: {airportCode: cart.airportCode}})
+            .then((response) => {
+                console.log("API Response: ",response.data);
+                setDestinations(response.data);
+            })
+            .catch((error) => {
+                console.error("API Error: ", error);
+                setError("Failed to retrieve destinations.");
+            })
+    })
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -55,7 +69,7 @@ function ScheduleCart() {
             const response = await api.post( // Use api instead of axios
                 '/api/cart/task',
                 {
-                    taskId: cartId+ticketNumber,
+                    taskId: cartId+"-"+ticketNumber,
                     cartId: cartId,
                     customerName: customerName,
                     ticketNumber: ticketNumber,
@@ -80,8 +94,8 @@ function ScheduleCart() {
         <div>
             <DropMyMenu />
 
-            <div style={{ fontFamily: 'Kanit', position: "absolute", top: "20%", left: '42%' }}>
-                <div style={{ fontSize: "250%" }}>Schedule Cart {cart.cartId}</div>
+            <div style={{ fontFamily: 'Kanit', position: "absolute", top: "15%", left: '42%' }}>
+                <b style={{ fontSize: "250%", color:"SaddleBrown" }}>Schedule Cart {cart.cartId}</b>
 
                 <form className="grid grid-cols-1" style={{ paddingTop: '5%' }} onSubmit={handleSubmit}>
                     <div className="grid grid-4" style={{ fontSize: "150%", paddingTop: '5%' }}>
@@ -124,8 +138,8 @@ function ScheduleCart() {
                             className='bg-amber-200'
                         >
                             <option value="" disabled>Select a Start Location</option>
-                            {["Gate A", "Gate B", "Gate C", "Charging Station"].map((loc) => (
-                                <option key={loc} value={loc}>{loc}</option>
+                            {destinations.map((loc) => (
+                                <option key={loc} value={loc.name}>{loc.name}</option>
                             ))}
                         </select>
 
@@ -138,8 +152,8 @@ function ScheduleCart() {
                             className='bg-amber-200'
                         >
                             <option value="" disabled>Select a Destination</option>
-                            {["Gate A", "Gate B", "Gate C", "Charging Station"].map((loc) => (
-                                <option key={loc} value={loc}>{loc}</option>
+                            {destinations.map((loc) => (
+                                <option key={loc} value={loc.name}>{loc.name}</option>
                             ))}
                         </select>
                     </div>

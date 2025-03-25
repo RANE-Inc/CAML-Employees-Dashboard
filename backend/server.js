@@ -433,8 +433,8 @@ app.post('/api/airport/destination', authMiddleware, adminMiddleware, requestBod
       airportCode: req.body.airportCode,
       name: req.body.name,
       type: req.body.type,
-      location: JSON.parse(req.body.location), // FIXME: JS Injection?
-      zone: JSON.parse(req.body.zone), // FIXME: JS Injection?
+      //location: JSON.parse(req.body.location), // FIXME: JS Injection?
+      //zone: JSON.parse(req.body.zone), // FIXME: JS Injection?
     });
 
     // console.log("Created Location: ", savedLoc);

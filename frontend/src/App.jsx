@@ -10,6 +10,7 @@ import AdminDashboard from './assets/AdminDashboard';
 import ScheduleCart from './assets/ScheduleCart';
 import CreateCart from './assets/CreateCart';
 import CreateLocation from './assets/CreateLocation';
+import AddDestination from './assets/AddDestination';
 //import ConnectROS from './components/ui/ConnectROS'
 import './App.css';
 
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/AdminDashboard" element = {<AdminDashboard/>} />
         <Route path="/CreateCart" element = {<CreateCart/>} />
         <Route path="/CreateLocation" element = {<CreateLocation/>} />
+        <Route path="/AddDestination/:airportCode" element = {<AddDestination/>}/>
       </Routes>
 
     </div>

@@ -131,3 +131,4 @@ dist
 
 # MongoDB
 backend/db
+start_dev.ps1
