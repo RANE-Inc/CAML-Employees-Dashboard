@@ -1,0 +1,18 @@
+[{
+  "_id": {
+    "$oid": "67e213765611ff9cf9727ad0"
+  },
+  "cartId": "YOW-A",
+  "name": "A",
+  "airportCode": "YOW",
+  "_v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2141e5611ff9cf9727ad3"
+  },
+  "cartId": "YOW-B",
+  "name": "B",
+  "airportCode": "YOW",
+  "__v": 0
+}]

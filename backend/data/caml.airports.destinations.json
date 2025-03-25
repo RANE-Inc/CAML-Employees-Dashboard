@@ -1,0 +1,24 @@
+[{
+  "_id": {
+    "$oid": "67e217e628104db04d53a229"
+  },
+  "destinationId": "YOW-Harvey's",
+  "airportCode": "YOW",
+  "name": "Harvey's",
+  "type": "Restaurant",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2180428104db04d53a232"
+  },
+  "destinationId": "YOW-Security Check In Gate A",
+  "airportCode": "YOW",
+  "name": "Security Check In Gate A",
+  "type": "Bathroom",
+  "location": [],
+  "zone": [],
+  "__v": 0
+}]

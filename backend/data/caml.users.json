@@ -1,0 +1,20 @@
+[{
+  "_id": {
+    "$oid": "67aeb172ce0deaaca3d94011"
+  },
+  "username": "Admin",
+  "password": "$2a$10$W9.JSZc1pKyVHJS9Kn/IX.PbWEqt7.JPRfgC8GnW/i073zIw.jdGa",
+  "role": "admin",
+  "apiKeys": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67aebe25aac1d82aa57159d4"
+  },
+  "username": "User",
+  "password": "$2a$10$YzWzSLLewiL0fUSqP/YQi.ieS5MaQNJjFtP5KXE5RTmY5.5e7y896",
+  "role": "user",
+  "apiKeys": [],
+  "__v": 0
+}]

@@ -1,0 +1,9 @@
+[{
+  "_id": {
+    "$oid": "67e214365611ff9cf9727ad6"
+  },
+  "airportCode": "YOW",
+  "name": "Ottawa International Airport",
+  "location": "Ottawa, Ontario, Canada",
+  "__v": 0
+}]

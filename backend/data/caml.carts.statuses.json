@@ -1,0 +1,20 @@
+[{
+  "_id": {
+    "$oid": "67e214bd5611ff9cf9727add"
+  },
+  "cartId": "YOW-A",
+  "battery": -1,
+  "status": "Offline",
+  "destinationId": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2150e5611ff9cf9727adf"
+  },
+  "cartId": "YOW-B",
+  "battery": -1,
+  "status": "Offline",
+  "destinationId": null,
+  "__v": 0
+}]
