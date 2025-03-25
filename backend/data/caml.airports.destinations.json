@@ -21,4 +21,220 @@
   "location": [],
   "zone": [],
   "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2227f5c649c35421025bc"
+  },
+  "destinationId": "YOW-Charging Station",
+  "airportCode": "YOW",
+  "name": "Charging Station",
+  "type": "Other",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e222a15c649c35421025c2"
+  },
+  "destinationId": "YOW-RELAY Convenience",
+  "airportCode": "YOW",
+  "name": "RELAY Convenience",
+  "type": "Store",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e222af5c649c35421025c8"
+  },
+  "destinationId": "YOW-Duty Free",
+  "airportCode": "YOW",
+  "name": "Duty Free",
+  "type": "Store",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e223ee5c649c3542102ea0"
+  },
+  "destinationId": "YYZ-Wahlburgers",
+  "airportCode": "YYZ",
+  "name": "Wahlburgers",
+  "type": "Restaurant",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e224185c649c3542102ea6"
+  },
+  "destinationId": "YYZ-Men's Bathroom",
+  "airportCode": "YYZ",
+  "name": "Men's Bathroom",
+  "type": "Bathroom",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2244c5c649c3542102eb0"
+  },
+  "destinationId": "YYZ-Gate A",
+  "airportCode": "YYZ",
+  "name": "Gate A",
+  "type": "Gate",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2304832ea8cfa55ffbedc"
+  },
+  "destinationId": "YYZ-Best Buy Mobile",
+  "airportCode": "YYZ",
+  "name": "Best Buy Mobile",
+  "type": "Store",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2308c32ea8cfa55ffbf01"
+  },
+  "destinationId": "YVR-Men's Bathroom",
+  "airportCode": "YVR",
+  "name": "Men's Bathroom",
+  "type": "Bathroom",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e230b432ea8cfa55ffbf07"
+  },
+  "destinationId": "YVR-Security Check In Gate C",
+  "airportCode": "YVR",
+  "name": "Security Check In Gate C",
+  "type": "Pickup",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e230c732ea8cfa55ffbf0d"
+  },
+  "destinationId": "YVR-Gate C",
+  "airportCode": "YVR",
+  "name": "Gate C",
+  "type": "Gate",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e230ef32ea8cfa55ffbf13"
+  },
+  "destinationId": "YVR-Subway",
+  "airportCode": "YVR",
+  "name": "Subway",
+  "type": "Restaurant",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2312032ea8cfa55ffbf19"
+  },
+  "destinationId": "YVR-Charging Station",
+  "airportCode": "YVR",
+  "name": "Charging Station",
+  "type": "Other",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2313732ea8cfa55ffbf33"
+  },
+  "destinationId": "YYZ-Charging Station",
+  "airportCode": "YYZ",
+  "name": "Charging Station",
+  "type": "Other",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2314f32ea8cfa55ffbf62"
+  },
+  "destinationId": "JFK-Gate B",
+  "airportCode": "JFK",
+  "name": "Gate B",
+  "type": "Gate",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e233c71d062671d2872b73"
+  },
+  "destinationId": "JFK-Security Check In Gate B",
+  "airportCode": "JFK",
+  "name": "Security Check In Gate B",
+  "type": "Pickup",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e234ff4e432de9c5737b6a"
+  },
+  "destinationId": "JFK-Shake Shack",
+  "airportCode": "JFK",
+  "name": "Shake Shack",
+  "type": "Restaurant",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e235124e432de9c5737b70"
+  },
+  "destinationId": "JFK-Charging Station",
+  "airportCode": "JFK",
+  "name": "Charging Station",
+  "type": "Other",
+  "location": [],
+  "zone": [],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2370bb2594290fcf9d933"
+  },
+  "destinationId": "YYZ-Security Check In Gate A",
+  "airportCode": "YYZ",
+  "name": "Security Check In Gate A",
+  "type": "Pickup",
+  "location": [],
+  "zone": [],
+  "__v": 0
 }]

@@ -17,4 +17,130 @@
   "status": "Offline",
   "destinationId": null,
   "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2369db2594290fcf9d8a6"
+  },
+  "cartId": "YYZ-YYZ-1",
+  "battery": -1,
+  "status": "Offline",
+  "position": [
+    null,
+    null
+  ],
+  "destinationId": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236a3b2594290fcf9d8b4"
+  },
+  "cartId": "YOW-YYZ-2",
+  "battery": -1,
+  "status": "Offline",
+  "position": [
+    null,
+    null
+  ],
+  "destinationId": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236b5b2594290fcf9d8c2"
+  },
+  "cartId": "YVR-YYZ-1",
+  "battery": -1,
+  "status": "Offline",
+  "position": [
+    null,
+    null
+  ],
+  "destinationId": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236cdb2594290fcf9d8d0"
+  },
+  "cartId": "YYZ-1",
+  "battery": -1,
+  "status": "Offline",
+  "position": [
+    null,
+    null
+  ],
+  "destinationId": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236d1b2594290fcf9d8de"
+  },
+  "cartId": "YYZ-2",
+  "battery": -1,
+  "status": "Offline",
+  "position": [
+    null,
+    null
+  ],
+  "destinationId": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236d4b2594290fcf9d8ec"
+  },
+  "cartId": "YVR-1",
+  "battery": -1,
+  "status": "Offline",
+  "position": [
+    null,
+    null
+  ],
+  "destinationId": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236d8b2594290fcf9d8fa"
+  },
+  "cartId": "YVR-2",
+  "battery": -1,
+  "status": "Offline",
+  "position": [
+    null,
+    null
+  ],
+  "destinationId": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236dbb2594290fcf9d908"
+  },
+  "cartId": "JFK-1",
+  "battery": -1,
+  "status": "Offline",
+  "position": [
+    null,
+    null
+  ],
+  "destinationId": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236deb2594290fcf9d916"
+  },
+  "cartId": "JFK-2",
+  "battery": -1,
+  "status": "Offline",
+  "position": [
+    null,
+    null
+  ],
+  "destinationId": null,
+  "__v": 0
 }]

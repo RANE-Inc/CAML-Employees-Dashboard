@@ -6,4 +6,31 @@
   "name": "Ottawa International Airport",
   "location": "Ottawa, Ontario, Canada",
   "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e222d95c649c35421025de"
+  },
+  "airportCode": "YYZ",
+  "name": "default",
+  "location": "Toronto, Ontario, Canada",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2234b5c649c35421025e4"
+  },
+  "airportCode": "YVR",
+  "name": "default",
+  "location": "Vancouver, British Columbia, Canada",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e2239f5c649c35421025ea"
+  },
+  "airportCode": "JFK",
+  "name": "default",
+  "location": "New York, NewYork, United States of America",
+  "__v": 0
 }]

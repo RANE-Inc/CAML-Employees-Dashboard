@@ -132,3 +132,6 @@ dist
 # MongoDB
 backend/db
 start_dev.ps1
+
+#Mac OS
+.DS_Store

@@ -15,4 +15,58 @@
   "name": "B",
   "airportCode": "YOW",
   "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236cdb2594290fcf9d8cf"
+  },
+  "cartId": "YYZ-1",
+  "name": "1",
+  "airportCode": "YYZ",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236d1b2594290fcf9d8dd"
+  },
+  "cartId": "YYZ-2",
+  "name": "2",
+  "airportCode": "YYZ",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236d4b2594290fcf9d8eb"
+  },
+  "cartId": "YVR-1",
+  "name": "1",
+  "airportCode": "YVR",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236d8b2594290fcf9d8f9"
+  },
+  "cartId": "YVR-2",
+  "name": "2",
+  "airportCode": "YVR",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236dbb2594290fcf9d907"
+  },
+  "cartId": "JFK-1",
+  "name": "1",
+  "airportCode": "JFK",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67e236deb2594290fcf9d915"
+  },
+  "cartId": "JFK-2",
+  "name": "2",
+  "airportCode": "JFK",
+  "__v": 0
 }]
