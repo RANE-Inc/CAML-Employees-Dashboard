@@ -14,6 +14,11 @@ function AddDestination(){
     const [loading, setLoading] = useState(true);
     const [locType, setLocType] = useState('');
     const [locName, setLocName] = useState('');
+    const [locX, setLocX] = useState('');
+    const [locY, setLocY] = useState('');
+    const [zoneX, setZoneX] = useState('');
+    const [zoneY, setZoneY] = useState('');
+
 
     // Check authentication on component mount
     useEffect(() => {
@@ -38,8 +43,8 @@ function AddDestination(){
                     airportCode: airportCode,
                     name: locName,
                     type: locType,
-                    location: "default",
-                    zone: "default"
+                    location: ("["+locX+","+locY+"]"),
+                    zone: "["+zoneX+","+zoneY+"]"
                 }
             );
             console.log("API Response: ", response.data);
@@ -55,11 +60,11 @@ function AddDestination(){
         <div>
             <DropMyMenu/>
 
-            <b style={{position:'absolute', fontSize:"250%", color:"SaddleBrown", top:'13%', left:'38%'}}>
+            <b style={{position:'absolute', fontSize:"250%", color:"SaddleBrown", top:'12%', left:'38%'}}>
                 Create Destination at {airportCode}
             </b>
 
-            <form className="grid grid-cols-1" style={{position:'absolute', left:'46%', top:'23%'  }} onSubmit={handleSubmit}>
+            <form className="grid grid-cols-1" style={{position:'absolute', left:'46%', top:'20%'  }} onSubmit={handleSubmit}>
                 <div className="grid grid-4" style={{fontSize: "150%", paddingTop: '5%'}}>
 
                     {/* Select Location Type */}
@@ -85,6 +90,46 @@ function AddDestination(){
                         className="bg-amber-200 p-2"
                         type="text"
                         placeholder="Enter Destination Name"
+                    />
+
+                {/* Input Location X/Y */}
+                <label htmlFor='locName' className="grid-cols-2" style={{ fontSize: "150%", paddingTop: '10%' }}>Location Coordinates</label>
+                    <input
+                        id="locX"
+                        value={locX}
+                        onChange={(e) => setLocX(e.target.value)}
+                        className="bg-amber-200 p-2"
+                        type="text"
+                        placeholder="Enter X"
+                    />
+                    <input
+                        id="locY"
+                        value={locY}
+                        onChange={(e) => setLocY(e.target.value)}
+                        className="bg-amber-200 p-2"
+                        style={{transform:'translateY(10%)'}}
+                        type="text"
+                        placeholder="Enter Y"
+                    />
+
+                {/* Input Location X/Y */}
+                <label htmlFor='locName' className="grid-cols-2" style={{ fontSize: "150%", paddingTop: '10%' }}>Zone Coordinates</label>
+                    <input
+                        id="zoneX"
+                        value={zoneX}
+                        onChange={(e) => setZoneX(e.target.value)}
+                        className="bg-amber-200 p-2"
+                        type="text"
+                        placeholder="Enter X"
+                    />
+                    <input
+                        id="zoneY"
+                        value={zoneY}
+                        onChange={(e) => setZoneY(e.target.value)}
+                        className="bg-amber-200 p-2"
+                        style={{transform:'translateY(10%)'}}
+                        type="text"
+                        placeholder="Enter Y"
                     />
 
                 {/* Confirm Button */}
