@@ -69,7 +69,7 @@ const cartSchemas = {
   status: new mongoose.Schema({
     cartId: String,
     battery: Number,
-    status: {type: String, enum: ["Offline"]}, // TODO: More states
+    status: {type: String, enum: ["Offline", "Idle", "On Task", "Going/Returning to Task",]},
     position: [Number],
     destinationId: String
   }),
@@ -131,14 +131,6 @@ app.use(cors({
   allowedHeaders: "Content-Type,Authorization", // Allowed headers
 }));
 app.use(cookieParser());
-
-// Alternitive cors for tabletLogin
-const corsTablet = cors({
-  origin: "http://localhost:3000", // Frontend (Electron app) URL
-  credentials: true, // Allow cookies or authorization headers
-  methods: "GET, POST", // Allow both GET and POST requests
-  allowedHeaders: "Content-Type,Authorization", // Allow necessary headers
-});
 
 //// Middlewares
 async function apiKeyMiddleware(req, res, next) {
