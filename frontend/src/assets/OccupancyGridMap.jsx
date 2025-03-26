@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
+import api from '../api/axiosInstance';
 
-const socket = io('http://localhost:5000');
-
-function OccupancyGridMap() {
+function OccupancyGridMap(props) {
     const [mapData, setMapData] = useState(null);
     const [error, setError] = useState(null);
     const canvasRef = useRef(null);
@@ -12,26 +11,26 @@ function OccupancyGridMap() {
         // Fetch initial map data
         const fetchMapData = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/map');
+                const response = api.get('/api/map', {params: {cartId: props.cartId}});
                 if (!response.ok) {
                     throw new Error('Failed to fetch map data');
                 }
                 const data = await response.json();
                 setMapData(data);
             } catch (error) {
-                console.error('Error fetching map data:', error);
+                console.log('Error fetching map data:', error);
                 setError('Error fetching map data. Please try again later.');
             }
         };
         fetchMapData();
 
         // Listen for real-time updates
-        socket.on('mapData', (data) => {
-            setMapData(data);
-        });
+        // socket.on('mapData', (data) => {
+        //     setMapData(data);
+        // });
 
         // Cleanup socket listener on unmount
-        return () => socket.off('mapData');
+        // return () => socket.off('mapData');
     }, []);
 
     useEffect(() => {

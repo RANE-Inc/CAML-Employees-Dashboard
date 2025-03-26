@@ -603,6 +603,8 @@ app.get('/api/cart/map', apiKeyMiddleware, authMiddleware, queryStringsMiddlewar
       res.json(mapData);
   } else {
       res.status(404).json({ error: 'No map data available' });
+      //mapData = input string/array/whatev here later
+      //res.json(mapData)
   }
 });
 

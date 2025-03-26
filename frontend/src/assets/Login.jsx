@@ -25,7 +25,7 @@ function Login() {
     };
 
     return (
-        <div style={{ fontFamily: 'Kanit', position: "absolute", top: "20%", left: '37%' }}>
+        <div style={{ fontFamily: 'Kanit', position: "absolute", top: "20%", left: '34%' }}>
             <div style={{fontSize:"250%", color:"SaddleBrown"}}>
                 Welcome To
             </div>

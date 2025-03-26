@@ -162,7 +162,7 @@ function Cart(){
             </b>
             
             
-            <OccupancyGridMap/>
+            <OccupancyGridMap cartId={cartId}/>
 
             <b style={{ position: "absolute", color:"SaddleBrown", top:'10%', left:'76%', fontSize: '200%' }}>
                 Live Camera
@@ -195,7 +195,7 @@ function Cart(){
                     </div>
                 </Card>
                 
-                <b style={{ position: "absolute", color:"SaddleBrown", top: "16%", left: "46%", fontSize: '200%' }}>
+                <b style={{ position: "absolute", color:"SaddleBrown", top: "15%", left: "46%", fontSize: '200%' }}>
                     Tasks
                 </b>
                 <div
