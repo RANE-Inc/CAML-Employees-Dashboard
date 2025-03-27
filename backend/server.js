@@ -54,7 +54,7 @@ const airportSchemas = {
     destinationId: String,
     airportCode: String,
     name: String,
-    type: {type: String, enum: ["Pickup", "Gate", "Bathroom", "Store", "Restaurant", "Other"]},
+    type: {type: String, enum: ["Pickup", "Gate", "Bathroom", "Store", "Restaurant", "Other",]},
     location: [Number],
     zone: [[Number]]
   })
