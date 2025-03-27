@@ -115,21 +115,22 @@ const app = express();
 app.use(express.json());
 app.use(bodyParser.json()); 
 
-
 const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (allowedOrigins.includes(origin) || !origin) {  // Allow no-origin requests (e.g., for Postman or server-side)
+    if (!origin || allowedOrigins.includes(origin)) {  
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.error(`Blocked by CORS: ${origin}`);
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true, // Allow cookies and authentication headers
-  methods: "GET,POST,PATCH,PUT,DELETE", // Allowed HTTP methods
-  allowedHeaders: "Content-Type,Authorization", // Allowed headers
+  methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
 app.use(cookieParser());
 
 //// Middlewares
