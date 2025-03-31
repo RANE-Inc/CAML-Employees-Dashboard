@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 import api from '../api/axiosInstance';
+import sandMap from '../components/ui/sandbox1.jpeg';
+
 
 function OccupancyGridMap(props) {
     const [mapData, setMapData] = useState(null);
@@ -87,12 +89,13 @@ function OccupancyGridMap(props) {
     }, [mapData]);
 
     return (
-        <div style={{position:'absolute', top:'64%', left: '73%'}}>
+        <div style={{position:'absolute', top:'62%', left: '75%'}}>
             <b style={{fontSize:"200%", color:"SaddleBrown"}}>
                 Map of Cart
             </b>
-            {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
-            <canvas ref={canvasRef} style={{ border: '1px solid black'}}></canvas>
+            <div style={{position:'relative', height:'160%', width:'160%'}}>
+                <img src={sandMap}></img>
+            </div>
         </div>
     );
 }
