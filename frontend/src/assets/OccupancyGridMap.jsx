@@ -1,13 +1,18 @@
 import { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 import api from '../api/axiosInstance';
-import sandMap from '../components/ui/sandbox1.jpeg';
+import sand_Map from '../components/ui/sandbox1.jpeg';
+import YOW_Map from '../components/ui/YOWMap.jpg';
+import mapNotFound from '../components/ui/notFound.jpg';
 
 
 function OccupancyGridMap(props) {
     const [mapData, setMapData] = useState(null);
     const [error, setError] = useState(null);
+    const [map, setMap] = useState(null);
     const canvasRef = useRef(null);
+
+    const airportCode = props.airportCode
 
     useEffect(() => {
         // Fetch initial map data
@@ -88,13 +93,25 @@ function OccupancyGridMap(props) {
         return () => window.removeEventListener('resize', handleResize);
     }, [mapData]);
 
+    useEffect(() => {
+        if(airportCode == 'YOW'){
+            setMap(sand_Map);
+        }
+        else if(airportCode == 'YOW1'){
+            setMap(YOW_Map);
+        }
+        else{
+            setMap(mapNotFound);
+        }
+    })
+
     return (
         <div style={{position:'absolute', top:'62%', left: '75%'}}>
             <b style={{fontSize:"200%", color:"SaddleBrown"}}>
                 Map of Cart
             </b>
             <div style={{position:'relative', height:'160%', width:'160%'}}>
-                <img src={sandMap}></img>
+                <img src={map}></img>
             </div>
         </div>
     );

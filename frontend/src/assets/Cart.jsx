@@ -162,7 +162,7 @@ function Cart(){
             </b>
             
             
-            <OccupancyGridMap cartId={cartId}/>
+            <OccupancyGridMap cartId={cartId} airportCode={cart.airportCode}/>
 
             <b style={{ position: "absolute", color:"SaddleBrown", top:'10%', left:'76%', fontSize: '200%' }}>
                 Live Camera
