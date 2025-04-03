@@ -75,6 +75,7 @@ function AddDestination(){
                         onChange={(e) => setLocType(e.target.value)}
                         className='bg-amber-200'
                     >
+                        <option value="" disabled>Select Type</option>
                         {["Pickup", "Gate", "Bathroom", "Store", "Restaurant", "Other"].map((loc) => (
                             <option key={loc} value={loc}>{loc}</option>
                         ))}

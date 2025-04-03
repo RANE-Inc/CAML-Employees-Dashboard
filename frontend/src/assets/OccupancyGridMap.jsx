@@ -94,10 +94,10 @@ function OccupancyGridMap(props) {
     }, [mapData]);
 
     useEffect(() => {
-        if(airportCode == 'YOW'){
+        if(airportCode == 'SANDBOX' || airportCode == 'S2061'){
             setMap(sand_Map);
         }
-        else if(airportCode == 'YOW1'){
+        else if(airportCode == 'YOW'){
             setMap(YOW_Map);
         }
         else{

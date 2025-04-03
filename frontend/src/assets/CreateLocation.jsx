@@ -36,7 +36,7 @@ function CreateLocation(){
             const response = await api.post('/api/createAirport',
                 {
                     location: ((city) + ', ' + (state) + ', ' + (country)),
-                    name: "default",
+                    name: AP_name,
                     airportCode: airportCode,
                 }
             );

@@ -45,7 +45,7 @@ function Locations(){
             <div style={{position:"absolute", top:"10%", left:"17%"}} className="grid gap-12 p-4 sm:grid-cols-3 md:grid-cols-4">
                 {Airports.map((airport) =>
                     <div key={airport.airportCode} className='max-w-xs text-left'>
-                        <Card className="bg-amber-400 h-[170px] w-[120%]">
+                        <Card className="bg-amber-400 h-[185px] w-[110%]">
                             <CardTitle style={{paddingLeft:"7%", paddingTop:"3%", fontSize:"160%"}}>{airport.airportCode} Airport</CardTitle>
                             <CardContent style={{paddingTop:"3%", paddingBottom:"1%", fontSize:"110%"}}>Location: {airport.location} </CardContent>
                             <CardContent style={{paddingBottom:"3%", fontSize:"110%"}}>Code: {airport.airportCode} </CardContent>
